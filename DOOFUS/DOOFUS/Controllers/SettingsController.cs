@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using DOOFUS.Models;
 using System.Web.Mvc;
 
 namespace DOOFUS.Controllers
@@ -9,23 +6,20 @@ namespace DOOFUS.Controllers
     public class SettingsController : Controller
     {
         // GET: Settings
-        public ActionResult Index()
+        public Setting[] Get()
         {
-            return View();
-        }
-
-        // GET api/values
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/values/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        
+            return new Setting[]
+            {
+                new Setting
+                {
+                    Id = 0,
+                    Key = "test",
+                    CustomerId = 0,
+                    UserName = "Test",
+                    LastModifiedBy = "JC",
+                    LastModifiedById = 0
+                }
+            };
+         }        
     }
 }
