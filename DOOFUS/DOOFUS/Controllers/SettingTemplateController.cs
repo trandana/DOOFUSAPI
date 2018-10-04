@@ -9,7 +9,7 @@ using System.Web.Mvc;
 
 namespace DOOFUS.Nhbnt.Web.Controllers
 {
-    public class SettingsTemplateController : ApiController
+    public class SettingTemplateController : ApiController
     {
         static readonly ISettingsRepository settingRepository = new SettingDataRepository();
 

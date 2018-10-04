@@ -7,16 +7,17 @@ namespace DOOFUS.Models.Persistence
 {
     public class SettingDataRepository : ISettingsRepository
     {
+        //Query Goes here
         public Setting Add(Setting setting)
         {
             throw new NotImplementedException();
         }
-
+        
         public void Delete(int id)
         {
             throw new NotImplementedException();
-        }
-
+        }        
+        
         public Setting Get(int id)
         {
             throw new NotImplementedException();
