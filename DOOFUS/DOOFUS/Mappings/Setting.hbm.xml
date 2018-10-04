@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" auto-import="true" assembly="DOOFUS.Nhbnt.Web"
+                   namespace="DOOFUS.Nhbnt.Web.Models">
+  <class name="Book" table="Book" dynamic-update="true">
+    <cache usage="read-write"/>
+    <id name="Id" column="Id" type="long">
+      <generator class="native"/>
+    </id>
+    <property name="Attribute1"/>
+    <property name="Attribute2"/>
+    <property name="Attribute3"/>
+    <property name="Attribute4"/>
+    <property name="Attribute5"/>
+    <property name="Attribute6"/>
+    <property name="Attribute7"/>
+    <property name="Attribute8"/>
+    <property name="Attribute9"/>
+  </class>  
+</hibernate-mapping>

@@ -5,8 +5,10 @@ using System.Web;
 
 namespace DOOFUS.Models
 {
-    public class Setting : SettingsBase
+    public class SettingTemplate : SettingsBase
     {
-        public string Value { get; set; }
+        //Group
+
+        //Blob
     }
 }

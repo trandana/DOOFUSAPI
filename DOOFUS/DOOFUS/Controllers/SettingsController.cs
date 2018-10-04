@@ -6,18 +6,13 @@ namespace DOOFUS.Controllers
     public class SettingsController : Controller
     {
         // GET: Settings
-        public Setting[] Get()
+        public SettingsBase[] Get()
         {
-            return new Setting[]
+            return new SettingsBase[]
             {
-                new Setting
-                {
-                    Id = 0,
-                    Key = "test",
-                    CustomerId = 0,
-                    UserName = "Test",
-                    LastModifiedBy = "JC",
-                    LastModifiedById = 0
+                new SettingsBase
+                { 
+                   
                 }
             };
          }        
