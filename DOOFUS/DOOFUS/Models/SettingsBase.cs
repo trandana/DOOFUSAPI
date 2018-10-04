@@ -13,6 +13,8 @@ namespace DOOFUS.Models
         
         public virtual int CustomerId { get; set; }
 
+        public virtual int DeviceId { get; set; }
+
         public virtual string UserName { get; set; }
         
         public virtual DateTime StartEffectiveDate { get; set; }
