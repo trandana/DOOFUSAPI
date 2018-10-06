@@ -15,6 +15,23 @@ namespace DOOFUS.Helper
     {
         private static ISessionFactory _sessionFactory;
 
+        public static ISession OpenSession()
+        {
+            return SessionFactory.OpenSession();
+
+        }
+
+        private static ISessionFactory SessionFactory
+        {
+            get
+            {
+                if (_sessionFactory == null)
+                    CreateSessionFactory();
+
+                return _sessionFactory;
+            }
+        }
+
         //Session factory
         private static void CreateSessionFactory()
         {

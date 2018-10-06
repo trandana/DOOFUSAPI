@@ -9,6 +9,11 @@ using System.Web.Mvc;
 
 namespace DOOFUS.Nhbnt.Web.Controllers
 {
+
+    //POST/PUT/DELETE api/settingstemplate/{global or customer}/{setting key}?ids={csv list of entity ids}&overrideLower={optional true or false, default false} 
+    //POST/PUT/DELETE api/settingstemplate/{global or customer}/{entity id}/{setting key}? overrideLower={true or false, optional parameter}
+    //POST/PUT/DELETE api/settingstemplate/{device or user}/{customer id}/{setting key}?ids= {csv list of entity ids} 
+    //POST/PUT/DELETE api/settingstemplate/{device or user}/{customer id}/{entity id}/{setting key}
     public class SettingTemplateController : ApiController
     {
         static readonly ISettingsRepository settingRepository = new SettingDataRepository();
@@ -19,7 +24,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Get setting
-        public Setting GetSettingById(int id)
+        public Setting GetSettingById(int id, string key)
         {
             var setting = settingRepository.Get(id);
 
