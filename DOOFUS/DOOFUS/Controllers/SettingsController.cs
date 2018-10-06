@@ -2,6 +2,7 @@
 using DOOFUS.Models.Persistence;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -22,19 +23,19 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route ("settings/customer/{customerId}")]
         public IEnumerable<Setting> GetCustomerSettingData(int customerId)
         {
-            //return all customer settings based on customer id. (json structure)
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId);
         }
 
         [Route("settings/device/{customerId}/{deviceId}")]
         public IEnumerable<Setting> GetDeviceSettingData(int customerId, int deviceId)
         {
-            //return all device settings based on customerid and device id (json structure)
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId);
         }
 
         [Route("settings/user/{customerId}/{userId}")]
-        public IEnumerable<Setting> GetUserSettingData(int customerId, int userId)
+        public IEnumerable<Setting> GetUserSettingData(int customerId, string userName)
         {
-            //return all user settings based on customerid and userid (json structure) 
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName);
         }
 
         //Get setting
@@ -52,9 +53,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Get settings with specified key
         [Route("settings/{key}")]
-        public void GetSettingsByKey(string key)
+        public IEnumerable<Setting> GetSettingsByKey(string key)
         {
-           //return json structure of different settings values specified by key
+            return settingRepository.GetAll().Where(d => d.Key == key);
         }
 
         //Delete a setting
