@@ -19,35 +19,92 @@ namespace DOOFUS
             // Web API routes
             config.MapHttpAttributeRoutes();           
 
+            //global
             config.Routes.MapHttpRoute(
-               name: "global",
-               routeTemplate: "api/{controller}/global/",
+               name: "Global",
+               routeTemplate: "api/{controller}/global/{key}",
                defaults: new { id = RouteParameter.Optional }
            );
 
             config.Routes.MapHttpRoute(
-               name: "customer",
-               routeTemplate: "api/{controller}/customer/{id}",
+              name: "GlobalOverride",
+              routeTemplate: "api/{controller}/global/{key}?overrideLower=true",
+              defaults: new { id = RouteParameter.Optional }
+          );
+
+            config.Routes.MapHttpRoute(
+              name: "GlobalEntity",
+              routeTemplate: "api/{controller}/global/{entity id}/{key}",
+              defaults: new { id = RouteParameter.Optional }
+          );
+
+            config.Routes.MapHttpRoute(
+              name: "GlobalEntityOverride",
+              routeTemplate: "api/{controller}/global/{entity id}/{key}?overrideLower=true",
+              defaults: new { id = RouteParameter.Optional }
+          );
+            //customer
+            config.Routes.MapHttpRoute(
+               name: "Customer",
+               routeTemplate: "api/{controller}/customer/{key}",
                defaults: new { id = RouteParameter.Optional }
            );
 
             config.Routes.MapHttpRoute(
-               name: "device/customerid/deviceid",
-               routeTemplate: "api/{controller}/device/{customer id}/{device id}",
-               defaults: new { id = RouteParameter.Optional }
-           );
+              name: "CustomerOverride",
+              routeTemplate: "api/{controller}/customer/{key}?overrideLower=true",
+              defaults: new { id = RouteParameter.Optional }
+          );
 
             config.Routes.MapHttpRoute(
-               name: "user/customerid/userid",
-               routeTemplate: "api/{controller}/user/{customer id}/{user id}",
-               defaults: new { id = RouteParameter.Optional }
-           );
+              name: "CustomerEntity",
+              routeTemplate: "api/{controller}/customer/{entity id}/{key}",
+              defaults: new { id = RouteParameter.Optional }
+          );
 
             config.Routes.MapHttpRoute(
-               name: "settingkey",
-               routeTemplate: "api/{controller}/{setting key}",
-               defaults: new { id = RouteParameter.Optional }
-           );
+              name: "CustomerEntityOverride",
+              routeTemplate: "api/{controller}/customer/{entity id}/{key}?overrideLower=true",
+              defaults: new { id = RouteParameter.Optional }
+          );
+
+            //user
+            config.Routes.MapHttpRoute(
+              name: "User",
+              routeTemplate: "api/{controller}/User/{customer id}{key}",
+              defaults: new { id = RouteParameter.Optional }
+          );          
+
+            config.Routes.MapHttpRoute(
+            name: "UserEntity",
+            routeTemplate: "api/{controller}/User/{customer id}/{entity id}/{key}",
+            defaults: new { id = RouteParameter.Optional }
+        );          
+
+            //device
+            config.Routes.MapHttpRoute(
+              name: "Device",
+              routeTemplate: "api/{controller}/device/{customer id}/{key}",
+              defaults: new { id = RouteParameter.Optional }
+          );
+
+            config.Routes.MapHttpRoute(
+              name: "DeviceOverride",
+              routeTemplate: "api/{controller}/device/{customer id}/{key}?overrideLower=true",
+              defaults: new { id = RouteParameter.Optional }
+          );
+
+            config.Routes.MapHttpRoute(
+             name: "DeviceEntity",
+             routeTemplate: "api/{controller}/device/{customer id}/{entity id}/{key}",
+             defaults: new { id = RouteParameter.Optional }
+         );
+
+            config.Routes.MapHttpRoute(
+            name: "DeviceEntityOverride",
+            routeTemplate: "api/{controller}/device/{customer id}/{entity id}/{key}/overrideLower=true",
+            defaults: new { id = RouteParameter.Optional }
+        );
 
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new System.Net.Http.Headers.MediaTypeHeaderValue("text/html"));
         }

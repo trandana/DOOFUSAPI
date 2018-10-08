@@ -18,7 +18,6 @@ namespace DOOFUS.Helper
         public static ISession OpenSession()
         {
             return SessionFactory.OpenSession();
-
         }
 
         private static ISessionFactory SessionFactory
