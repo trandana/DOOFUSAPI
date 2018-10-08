@@ -32,19 +32,19 @@ namespace DOOFUS
            );
 
             config.Routes.MapHttpRoute(
-               name: "device",
+               name: "device/customerid/deviceid",
                routeTemplate: "api/{controller}/device/{customer id}/{device id}",
                defaults: new { id = RouteParameter.Optional }
            );
 
             config.Routes.MapHttpRoute(
-               name: "device",
+               name: "user/customerid/userid",
                routeTemplate: "api/{controller}/user/{customer id}/{user id}",
                defaults: new { id = RouteParameter.Optional }
            );
 
             config.Routes.MapHttpRoute(
-               name: "device",
+               name: "settingkey",
                routeTemplate: "api/{controller}/{setting key}",
                defaults: new { id = RouteParameter.Optional }
            );
