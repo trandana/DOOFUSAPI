@@ -213,7 +213,7 @@
     <Compile Include="Models\Persistence\SettingDataRepository.cs" />
     <Compile Include="Models\Setting.cs" />
     <Compile Include="Models\SettingsBase.cs" />
-    <Compile Include="Models\SettingsDataMap.cs" />
+    <Compile Include="Models\SettingsMap.cs" />
     <Compile Include="Models\SettingTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

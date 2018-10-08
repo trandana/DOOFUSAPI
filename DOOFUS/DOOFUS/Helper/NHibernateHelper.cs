@@ -33,12 +33,10 @@ namespace DOOFUS.Helper
         }
 
         //Session factory
-        private static void CreateSessionFactory()
+        private static ISessionFactory CreateSessionFactory()
         {
-            string connectionString = "Server=EC2AMAZ-TFIDP2I; Database=TestDB; User Id=sa; Password=d00f20!8;";
-
-            _sessionFactory = Fluently.Configure().Database(MsSqlConfiguration.MsSql2008.ConnectionString(connectionString).ShowSql).Mappings(m => m.FluentMappings.AddFromAssemblyOf<Setting>())
-               .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(false, false)).BuildSessionFactory();
+            return Fluently.Configure().Database(MsSqlConfiguration.MsSql2008.ConnectionString(c => c.FromConnectionStringWithKey("DOOFUSDatabase"))).Mappings(m => m.FluentMappings.AddFromAssemblyOf<Setting>())
+                .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(true, true)).BuildSessionFactory();
         }
         
     }

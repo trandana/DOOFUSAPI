@@ -5,6 +5,7 @@ using System.Web;
 
 namespace DOOFUS.Models
 {
+    //This abstract class is overridden in Setting
     public class SettingsBase
     {
         public virtual int Id { get; set; }

@@ -70,8 +70,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             settingRepository.Delete(id);
         }
 
-        //Post a setting
-        
+        //Post a setting        
         public HttpResponseMessage PostSetting(Setting setting)
         {
             setting = settingRepository.Add(setting);
