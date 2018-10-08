@@ -5,7 +5,7 @@ using System.Web;
 
 namespace DOOFUS.Models
 {
-    public abstract class Setting : SettingsBase
+    public class Setting : SettingsBase
     {
         public string Value { get; set; }
     }
