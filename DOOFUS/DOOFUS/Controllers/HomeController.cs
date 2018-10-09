@@ -10,7 +10,7 @@ namespace DOOFUS.Controllers
     {
         public ActionResult Index()
         {
-            ViewBag.Title = "Home Page";
+            ViewBag.Title = "DOOFUS Home";
 
             return View();
         }

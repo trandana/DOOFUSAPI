@@ -28,7 +28,7 @@ namespace DOOFUS
 
             config.Routes.MapHttpRoute(
               name: "GlobalOverride",
-              routeTemplate: "api/{controller}/global/{key}?overrideLower=true",
+              routeTemplate: "api/{controller}/global/{key}/{overrideLower=true}",
               defaults: new { id = RouteParameter.Optional }
           );
 
@@ -40,7 +40,7 @@ namespace DOOFUS
 
             config.Routes.MapHttpRoute(
               name: "GlobalEntityOverride",
-              routeTemplate: "api/{controller}/global/{entity id}/{key}?overrideLower=true",
+              routeTemplate: "api/{controller}/global/{entity id}/{key}/{overrideLower=true}",
               defaults: new { id = RouteParameter.Optional }
           );
             //customer
@@ -52,7 +52,7 @@ namespace DOOFUS
 
             config.Routes.MapHttpRoute(
               name: "CustomerOverride",
-              routeTemplate: "api/{controller}/customer/{key}?overrideLower=true",
+              routeTemplate: "api/{controller}/customer/{key}/{overrideLower=true}",
               defaults: new { id = RouteParameter.Optional }
           );
 
@@ -64,14 +64,14 @@ namespace DOOFUS
 
             config.Routes.MapHttpRoute(
               name: "CustomerEntityOverride",
-              routeTemplate: "api/{controller}/customer/{entity id}/{key}?overrideLower=true",
+              routeTemplate: "api/{controller}/customer/{entity id}/{key}/{overrideLower=true}",
               defaults: new { id = RouteParameter.Optional }
           );
 
             //user
             config.Routes.MapHttpRoute(
               name: "User",
-              routeTemplate: "api/{controller}/User/{customer id}{key}",
+              routeTemplate: "api/{controller}/User/{customer id}/{key}",
               defaults: new { id = RouteParameter.Optional }
           );          
 
@@ -90,7 +90,7 @@ namespace DOOFUS
 
             config.Routes.MapHttpRoute(
               name: "DeviceOverride",
-              routeTemplate: "api/{controller}/device/{customer id}/{key}?overrideLower=true",
+              routeTemplate: "api/{controller}/device/{customer id}/{key}/{overrideLower=true}",
               defaults: new { id = RouteParameter.Optional }
           );
 
@@ -102,7 +102,7 @@ namespace DOOFUS
 
             config.Routes.MapHttpRoute(
             name: "DeviceEntityOverride",
-            routeTemplate: "api/{controller}/device/{customer id}/{entity id}/{key}/overrideLower=true",
+            routeTemplate: "api/{controller}/device/{customer id}/{entity id}/{key}/{overrideLower=true}",
             defaults: new { id = RouteParameter.Optional }
         );
 

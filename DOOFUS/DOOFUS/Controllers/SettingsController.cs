@@ -84,7 +84,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a global setting with option to override lower levels
-        [Route("settings/global/{key}?overrideLower=true")]
+        [Route("settings/global/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostGlobalSettingOverride(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -112,7 +112,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a global setting - Specific entity id with option to override 
-        [Route("settings/global/{entity id}{key}?overrideLower=true")]
+        [Route("settings/global/{entity id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostGlobalEntitySettingOverride(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -144,7 +144,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a setting (customer) with option to override lower levels
-        [Route("settings/customer/{key}?overrideLower=true")]
+        [Route("settings/customer/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostCustomerSettingOverride(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -172,7 +172,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a customer setting - Specific entity id with option to override lower levels
-        [Route("settings/customer/{entity id}/{key}?overrideLower=true")]
+        [Route("settings/customer/{entity id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostCustomerEntitySettingOverride(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -190,7 +190,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Post a device setting 
-        [Route("settings/device//{customer id}/{key}")]
+        [Route("settings/device/{customer id}/{key}")]
         public HttpResponseMessage PostDeviceSetting(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -204,7 +204,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a device setting and override lower levels
-        [Route("settings/device//{customer id}/{key}?overrideLower=true")]
+        [Route("settings/device/{customer id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostDeviceSettingOverride(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -232,7 +232,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a device setting for specific entity
-        [Route("settings/device/{entity id}/{customer id}/{key}?overrideLower=true")]
+        [Route("settings/device/{entity id}/{customer id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostDeviceEntitySettingOverride(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -297,7 +297,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put global with option to override
-        [Route("settings/global/{key}?overrideLower=true")]
+        [Route("settings/global/{key}/{overrideLower=true}")]
         public void PutGlobalSettingOverride(int id, Setting setting)
         {
             setting.Id = id;
@@ -317,7 +317,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put setting - Specific Entity (global) and specify override
-        [Route("settings/global/{entity id}/{key}?overrideLower=true")]
+        [Route("settings/global/{entity id}/{key}/{overrideLower=true}")]
         public void PutGlobalEntitySettingOverride(int id, Setting setting)
         {
             setting.Id = id;
@@ -341,7 +341,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put setting (customer) and override lower
-        [Route("settings/customer/{key}?overrideLower=true")]
+        [Route("settings/customer/{key}/{overrideLower=true}")]
         public void PutCustomerSettingOverride(int id, Setting setting)
         {
             setting.Id = id;
@@ -361,7 +361,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }                
 
         //Put setting - Specific Entity (customer) and override lower
-        [Route("settings/customer/{entity id}/{key}?overrideLower=true")]
+        [Route("settings/customer/{entity id}/{key}/{overrideLower=true}")]
         public void PutCustomerEntitySettingOverride(int id, Setting setting)
         {
             setting.Id = id;
@@ -385,7 +385,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put setting for device and override lower levels
-        [Route("settings/device/{customer id}/{key}?overrideLower=true")]
+        [Route("settings/device/{customer id}/{key}/{overrideLower=true}")]
         public void PutDeviceSettingOverride(int id, Setting setting)
         {
             setting.Id = id;
@@ -405,7 +405,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put setting for device - Specific entity and override lower levels
-        [Route("settings/device/{customer id}/{entity id}/{key}?overrideLower=true")]
+        [Route("settings/device/{customer id}/{entity id}/{key}/{overrideLower=true}")]
         public void PutDeviceEntitySettingOverride(int id, Setting setting)
         {
             setting.Id = id;
@@ -462,7 +462,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at global level and delete all lower levels also
-        [Route("settings/global/{key}?overrideLower=true")]
+        [Route("settings/global/{key}/{overrideLower=true}")]
         public void DeleteGlobalSettingOverride(int id)
         {
             var setting = settingRepository.Get(id);
@@ -488,7 +488,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at global level for specific entity and override all lower levels also
-        [Route("settings/global/{entity id}/{key}?overrideLower=true")]
+        [Route("settings/global/{entity id}/{key}/{overrideLower=true}")]
         public void DeleteGlobalEntitySettingOverride(int id)
         {
             var setting = settingRepository.Get(id);
@@ -518,7 +518,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at customer level and override all lower levels also
-        [Route("settings/customer/{key}?overrideLower=true")]
+        [Route("settings/customer/{key}/{overrideLower=true}")]
         public void DeleteCustomerSettingOverride(int id)
         {
             var setting = settingRepository.Get(id);
@@ -544,7 +544,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at customer level for specific entity id and override all lower levels also
-        [Route("settings/customer/{entity id}/{key}?overrideLower=true")]
+        [Route("settings/customer/{entity id}/{key}/{overrideLower=true}")]
         public void DeleteCustomerEntitySettingOverride(int id)
         {
             var setting = settingRepository.Get(id);
