@@ -70,14 +70,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //       
 
         //Post a setting (global) with option to override lower levels
-        [Route("settings/global/{key}")]
+ //       [Route("settings/global/{key}")]
         public HttpResponseMessage PostGlobalSetting(Setting setting)
         {
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
 
-            var uri = Url.Link("Global", new { id = setting.Id });
+            var uri = Url.Link("DefaultApi", new { id = setting.Id });
             response.Headers.Location = new Uri(uri);
 
             return response;
