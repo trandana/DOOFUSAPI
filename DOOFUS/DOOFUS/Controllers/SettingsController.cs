@@ -55,7 +55,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/{key}")]
         public IEnumerable<Setting> GetSettingsByKey(string key)
         {
-            return settingRepository.GetAll().Where(d => d.Key == key);
+            return settingRepository.GetAll().Where(d => d.SettingKey == key);
         }
 
 

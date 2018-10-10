@@ -10,7 +10,7 @@ namespace DOOFUS.Models
     {
         public virtual int Id { get; set; }
 
-        public virtual string Key { get; set; }
+        public virtual string SettingKey { get; set; }
         
         public virtual int CustomerId { get; set; }
 

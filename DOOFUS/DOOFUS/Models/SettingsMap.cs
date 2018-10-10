@@ -15,7 +15,7 @@ namespace DOOFUS.Models
             Id(x => x.Id, "Id").GeneratedBy.Identity().UnsavedValue(0); 
 
             //attributes
-            Map(x => x.Key);
+            Map(x => x.SettingKey);
             Map(x => x.CustomerId);
             Map(x => x.DeviceId);
             Map(x => x.UserName);
