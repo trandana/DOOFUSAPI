@@ -25,14 +25,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             return settingRepository.GetAll().Where(d => d.CustomerId == customerId);
         }
-
+       
         [Route("settings/device/{customerId}/{deviceId}")]
         public IEnumerable<Setting> GetDeviceSettingData(int customerId, int deviceId)
         {
             return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId);
         }
 
-        [Route("settings/user/{customerId}/{userId}")]
+        [Route("settings/user/{customerId}/{userName}")]
         public IEnumerable<Setting> GetUserSettingData(int customerId, string userName)
         {
             return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName);
@@ -51,12 +51,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return setting;
         }
 
+        /*
+         * This function interferes with the GET function above.
+         * 
         //Get settings with specified key
         [Route("settings/{key}")]
         public IEnumerable<Setting> GetSettingsByKey(string key)
         {
             return settingRepository.GetAll().Where(d => d.SettingKey == key);
-        }
+        }*/
 
 
 
@@ -70,7 +73,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //       
 
         //Post a setting (global) with option to override lower levels
- //       [Route("settings/global/{key}")]
+        [Route("settings/global")]
         public HttpResponseMessage PostGlobalSetting(Setting setting)
         {
             setting = settingRepository.Add(setting);
@@ -78,7 +81,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
 
             var uri = Url.Link("DefaultApi", new { id = setting.Id });
-            response.Headers.Location = new Uri(uri);
+            //response.Headers.Location = new Uri(uri); 
 
             return response;
         }
