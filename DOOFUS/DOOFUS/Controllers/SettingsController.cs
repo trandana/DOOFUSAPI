@@ -290,13 +290,32 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Put setting (global)
-        [Route("settings/global/{key}")]
-        public void PutGlobalSetting(int id, Setting setting)
+        [Route("settings/global/{id}")]
+        public HttpResponseMessage PutGlobalSetting(int id, Setting setting)
         {
-            setting.Id = id;
-
-            if (!settingRepository.Update(setting))
+            //get setting to update by 
+            var currentSetting = settingRepository.Get(id);
+            if(currentSetting == null)
+            {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+
+            //replace current setting values with new setting values
+            currentSetting.LastModifiedTimeStamp = setting.LastModifiedTimeStamp;
+            currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            currentSetting.LastModifiedById = setting.LastModifiedById;
+            currentSetting.Value = setting.Value;
+
+            //update setting
+            if(!settingRepository.Update(currentSetting))
+            {
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+            else
+            {
+                var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
+                return response;
+            }
         }
 
         //Put global with option to override
