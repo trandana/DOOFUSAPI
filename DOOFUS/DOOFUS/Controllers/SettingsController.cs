@@ -301,6 +301,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //replace current setting values with new setting values
+            currentSetting.SettingKey = setting.SettingKey;
+            currentSetting.CustomerId = setting.CustomerId;
+            currentSetting.DeviceId = setting.DeviceId;
+            currentSetting.UserName = setting.UserName;
+            currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            currentSetting.EndEffectiveDate = setting.EndEffectiveDate;
+            currentSetting.CreatedTimeStamp = setting.CreatedTimeStamp;
             currentSetting.LastModifiedTimeStamp = setting.LastModifiedTimeStamp;
             currentSetting.LastModifiedBy = setting.LastModifiedBy;
             currentSetting.LastModifiedById = setting.LastModifiedById;
