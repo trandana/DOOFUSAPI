@@ -20,12 +20,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return settingRepository.GetAll();
         }
 
-        [Route ("settings/customer/{customerId}")]
+        [Route("settings/customer/{customerId}")]
         public IEnumerable<Setting> GetCustomerSettingData(int customerId)
         {
             return settingRepository.GetAll().Where(d => d.CustomerId == customerId);
         }
-       
+
         [Route("settings/device/{customerId}/{deviceId}")]
         public IEnumerable<Setting> GetDeviceSettingData(int customerId, int deviceId)
         {
@@ -44,9 +44,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             var setting = settingRepository.Get(id);
 
-            if(setting == null)
+            if (setting == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);                
+                throw new HttpResponseException(HttpStatusCode.NotFound);
             }
             return setting;
         }
@@ -158,7 +158,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             response.Headers.Location = new Uri(uri);
 
             return response;
-        }                  
+        }
 
         //Post a customer setting - Specific entity id 
         [Route("settings/customer/{entity id}/{key}")]
@@ -278,8 +278,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             response.Headers.Location = new Uri(uri);
 
             return response;
-        }       
-       
+        }
+
 
         //
         // PUT
@@ -295,7 +295,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             //get setting to update by 
             var currentSetting = settingRepository.Get(id);
-            if(currentSetting == null)
+            if (currentSetting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
@@ -314,7 +314,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             currentSetting.Value = setting.Value;
 
             //update setting
-            if(!settingRepository.Update(currentSetting))
+            if (!settingRepository.Update(currentSetting))
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
@@ -325,34 +325,95 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
         }
 
-        //Put global with option to override
-        [Route("settings/global/{key}/{overrideLower=true}")]
-        public void PutGlobalSettingOverride(int id, Setting setting)
+        //Put global with option to override 
+        [Route("settings/global/{key}/{overrideLower?}")]
+        public HttpResponseMessage PutGlobalSettingOverride(string key, Setting setting, bool overrideLower = false)
         {
-            setting.Id = id;
+            //get all global settings with same key
+            var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.SettingKey == key).ToList();
 
-            if (!settingRepository.Update(setting))
+            if (listOfCurrentSettings == null)
+            {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+
+            if (!overrideLower) //if overrideLower is false, update all settings in list of current setting
+            {
+                for (int i = 0; i < listOfCurrentSettings.Count(); i++)
+                {
+                    listOfCurrentSettings[i].SettingKey = setting.SettingKey;
+                    listOfCurrentSettings[i].CustomerId = setting.CustomerId;
+                    listOfCurrentSettings[i].DeviceId = setting.DeviceId;
+                    listOfCurrentSettings[i].UserName = setting.UserName;
+                    listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    listOfCurrentSettings[i].EndEffectiveDate = setting.EndEffectiveDate;
+                    listOfCurrentSettings[i].CreatedTimeStamp = setting.CreatedTimeStamp;
+                    listOfCurrentSettings[i].LastModifiedTimeStamp = setting.LastModifiedTimeStamp;
+                    listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
+                    listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
+                    listOfCurrentSettings[i].Value = setting.Value;
+                }
+            }
+           /* else //if overrideLower is true, override device customer, and user settings associated with the specified key
+            {
+                
+            }*/
+
+            //update settings
+            for (int j = 0; j < listOfCurrentSettings.Count(); j++)
+            {
+                if (!settingRepository.Update(listOfCurrentSettings[j]))
+                {
+                    throw new HttpResponseException(HttpStatusCode.NotFound);
+                }
+            }
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
+            return response;
         }
 
         //Put setting - Specific Entity (global)
-        [Route("settings/global/{entity id}/{key}")]
-        public void PutGlobalEntitySetting(int id, Setting setting)
+        [Route("settings/global/{entityId}/{key}/{overrideLower?}")]
+        public HttpResponseMessage PutGlobalEntitySetting(int entityId, string key, Setting setting, bool overrideLower= false)
         {
-            setting.Id = id;
+            //Using first item in list because only one item should return from this query
+            var currentSetting = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key).ToList()[0];
 
-            if (!settingRepository.Update(setting))
+            if (currentSetting == null)
+            {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
-        }
+            }
 
-        //Put setting - Specific Entity (global) and specify override
-        [Route("settings/global/{entity id}/{key}/{overrideLower=true}")]
-        public void PutGlobalEntitySettingOverride(int id, Setting setting)
-        {
-            setting.Id = id;
+            if (!overrideLower) //if overrideLower is false, update specified setting with new setting values
+            {
+                //replace current setting values with new setting values
+                currentSetting.SettingKey = setting.SettingKey;
+                currentSetting.CustomerId = setting.CustomerId;
+                currentSetting.DeviceId = setting.DeviceId;
+                currentSetting.UserName = setting.UserName;
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                currentSetting.EndEffectiveDate = setting.EndEffectiveDate;
+                currentSetting.CreatedTimeStamp = setting.CreatedTimeStamp;
+                currentSetting.LastModifiedTimeStamp = setting.LastModifiedTimeStamp;
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+                currentSetting.Value = setting.Value;
+            }
+            /*else //if overrideLower is true, override lower levels
+            {
+                
+            }*/
 
-            if (!settingRepository.Update(setting))
+
+            //update setting
+            if (!settingRepository.Update(currentSetting))
+            {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+            else
+            {
+                var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
+                return response;
+            }
         }
 
         //
