@@ -356,7 +356,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
            /* else //if overrideLower is true, override device customer, and user settings associated with the specified key
             {
-                 
+                
             }*/
 
             //update settings
@@ -373,7 +373,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Put setting - Specific Entity (global)
         [Route("settings/global/{entityId}/{key}/{overrideLower?}")]
-        public HttpResponseMessage PutGlobalEntitySetting(int entityId, string key, Setting setting, bool overrideLower=false)
+        public HttpResponseMessage PutGlobalEntitySetting(int entityId, string key, Setting setting, bool overrideLower= false)
         {
             //Using first item in list because only one item should return from this query
             var currentSetting = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key).ToList()[0];
