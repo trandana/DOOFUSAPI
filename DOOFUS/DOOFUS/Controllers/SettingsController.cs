@@ -722,7 +722,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at device level for specific entity id 
-        [Route("settings/device/{CustomerId}/{deviceId}/{entityId}")]
+        [Route("settings/device/{CustomerId}/{deviceId}/{entityId}/{key}")]
         public HttpResponseMessage DeleteDeviceEntitySetting(int CustomerId,int deviceId,int entityId)
         {
             var setting = settingRepository.GetDeviceSetting(CustomerId,deviceId,entityId);
@@ -744,7 +744,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Delete a setting at user level
         //done
-        [Route("settings/user/{CustomerId}/{Username}")]
+        [Route("settings/user/{CustomerId}/{userId}")]
         public HttpResponseMessage DeleteUserSetting(string Username,int CustomerId)
         {
             var setting = settingRepository.GetUserSetting(CustomerId,Username);
@@ -762,7 +762,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Delete a setting at user level for specific entity id
         //done
-        [Route("settings/user/{CustomerId}/{deviceId}/{entityId}")]
+        [Route("settings/user/{CustomerId}/{deviceId}/{entityId}/{key}")]
         public HttpResponseMessage DeleteUserEntitySetting(int CustomerId,int DeviceId,int id)
         {
             var setting = settingRepository.GetUserSetting(CustomerId, DeviceId, id);
