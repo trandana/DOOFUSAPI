@@ -14,6 +14,8 @@ namespace DOOFUS.Models.Persistence
         Setting GetDeviceSetting(int CustomerId, int DeviceId, int EntityId);
         Setting GetDeviceSetting(int CustomerId, string key);
         Setting GetCustomerSetting(string key);
+        Setting GetCustomerSetting(int EntityId, string key);
+        Setting GetGlobalSetting(String key);
         IEnumerable<Setting> GetAll();
         Setting Add(Setting setting);
         void Delete(int id);

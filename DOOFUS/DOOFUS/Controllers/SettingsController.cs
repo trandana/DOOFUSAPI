@@ -539,29 +539,33 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Delete a setting global level
-        [Route("settings/global/{id}")]
-        public void DeleteGlobalSetting(int id)
+        [Route("settings/global/{key}")]
+        public HttpResponseMessage DeleteGlobalSetting(String key)
         {
-            var setting = settingRepository.Get(id);
-            if (setting == null)//have to insert into table after api is running to work, other than that, works as intended.
+            var setting = settingRepository.GetGlobalSetting(key);
+            if (setting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
             
-            settingRepository.Delete(id);
+            settingRepository.Delete(setting.Id);
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+
+            return response;
         }
 
         //Delete a setting at global level and delete all lower levels also
         [Route("settings/global/{key}/{overrideLower=true}")]
-        public void DeleteGlobalSettingOverride(int id)
+        public void DeleteGlobalSettingOverride(string key)
         {
-            var setting = settingRepository.Get(id);
+            var setting = settingRepository.GetGlobalSetting(key);
 
             if (setting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
-            settingRepository.Delete(id);
+            settingRepository.Delete(setting.Id);
+
         }
 
         //Delete a setting at global level for specific entity id 
@@ -613,7 +617,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Delete a setting at customer level and override all lower levels also
         [Route("settings/customer/{key}/{overrideLower=true}")]
-        public void DeleteCustomerSettingOverride(String key)
+        public HttpResponseMessage DeleteCustomerSettingOverride(String key)
         {
             var setting = settingRepository.GetCustomerSetting(key);
 
@@ -623,34 +627,63 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
             settingRepository.Delete(setting.Id);
 
-            var SettingList = settingRepository.GetAll();
+            //subject to change, override lower
+            var SettingList = settingRepository.GetAll()
+                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key).ToList();
+            if (SettingList.Count!=0)
+            {
+                foreach (var c in SettingList)
+                {
+                    settingRepository.Delete(c.Id);
+                }
+            }
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+
+            return response;
 
         }
 
         //Delete a setting at customer level for specific entity id
-        [Route("settings/customer/{entity id}/{key}")]
-        public void DeleteCustomerEntitySetting(int id)
+        [Route("settings/customer/{entityId}/{key}")]
+        public HttpResponseMessage DeleteCustomerEntitySetting(int entityId,string key)
         {
-            var setting = settingRepository.Get(id);
+            var setting = settingRepository.GetCustomerSetting(entityId,key);
 
             if (setting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
-            settingRepository.Delete(id);
+            settingRepository.Delete(setting.Id);
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+
+            return response;
+
         }
 
         //Delete a setting at customer level for specific entity id and override all lower levels also
-        [Route("settings/customer/{entity id}/{key}/{overrideLower=true}")]
-        public void DeleteCustomerEntitySettingOverride(int id)
+        [Route("settings/customer/{entityId}/{key}/{overrideLower=true}")]
+        public HttpResponseMessage DeleteCustomerEntitySettingOverride(int entityId,string key)
         {
-            var setting = settingRepository.Get(id);
+            var setting = settingRepository.GetCustomerSetting(entityId,key);
 
             if (setting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
-            settingRepository.Delete(id);
+            settingRepository.Delete(setting.Id);
+            //subject to change, override lower
+            var SettingList = settingRepository.GetAll()
+                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key).ToList();
+            if (SettingList.Count != 0)
+            {
+                foreach (var c in SettingList)
+                {
+                    settingRepository.Delete(c.Id);
+                }
+            }
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+
+            return response;
         }
 
         //
