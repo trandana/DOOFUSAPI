@@ -26,6 +26,7 @@ namespace DOOFUS.Models
             Map(x => x.LastModifiedBy);
             Map(x => x.LastModifiedById);
             Map(x => x.Value).Not.Nullable();
+            Map(x => x.Level);
         }
     }
 }

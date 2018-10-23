@@ -8,5 +8,6 @@ namespace DOOFUS.Models
     public class Setting : SettingsBase
     {
         public virtual string Value { get; set; }
+        public virtual string Level { get; set; }
     }
 }

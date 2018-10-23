@@ -17,25 +17,25 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global")]
         public IEnumerable<Setting> GetGlobalSettingData()
         {
-            return settingRepository.GetAll();
+            return settingRepository.GetAll().Where(d => d.Level == "Global");
         }
 
         [Route("settings/customer/{customerId}")]
         public IEnumerable<Setting> GetCustomerSettingData(int customerId)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId);
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.Level == "Customer");
         }
 
         [Route("settings/device/{customerId}/{deviceId}")]
         public IEnumerable<Setting> GetDeviceSettingData(int customerId, int deviceId)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId);
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId && d.Level == "Device");
         }
 
         [Route("settings/user/{customerId}/{userName}")]
         public IEnumerable<Setting> GetUserSettingData(int customerId, string userName)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName);
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName && d.Level == "User");
         }
 
         //Get setting
@@ -76,6 +76,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global")]
         public HttpResponseMessage PostGlobalSetting(Setting setting)
         {
+            setting.Level = "Global";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -90,6 +91,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostGlobalSettingOverride(Setting setting)
         {
+            setting.Level = "Global";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -104,6 +106,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{entity id}/{key}")]
         public HttpResponseMessage PostGlobalEntitySetting(Setting setting)
         {
+            setting.Level = "Global";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -118,6 +121,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{entity id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostGlobalEntitySettingOverride(Setting setting)
         {
+            setting.Level = "Global";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -136,6 +140,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{key}")]
         public HttpResponseMessage PostCustomerSetting(Setting setting)
         {
+            setting.Level = "Customer";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -150,6 +155,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostCustomerSettingOverride(Setting setting)
         {
+            setting.Level = "Customer";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -164,6 +170,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{entity id}/{key}")]
         public HttpResponseMessage PostCustomerEntitySetting(Setting setting)
         {
+            setting.Level = "Customer";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -178,6 +185,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{entity id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostCustomerEntitySettingOverride(Setting setting)
         {
+            setting.Level = "Customer";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -196,6 +204,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/device/{customer id}/{key}")]
         public HttpResponseMessage PostDeviceSetting(Setting setting)
         {
+            setting.Level = "Device";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -210,6 +219,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/device/{customer id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostDeviceSettingOverride(Setting setting)
         {
+            setting.Level = "Device";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -224,6 +234,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/device/{entity id}/{customer id}/{key}")]
         public HttpResponseMessage PostDeviceEntitySetting(Setting setting)
         {
+            setting.Level = "Device";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -238,6 +249,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/device/{entity id}/{customer id}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostDeviceEntitySettingOverride(Setting setting)
         {
+            setting.Level = "Device";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -256,6 +268,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/user/{entity id}/{customer id}/{key}")]
         public HttpResponseMessage PostUserSetting(Setting setting)
         {
+            setting.Level = "User";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -270,6 +283,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/user/{entity id}/{customer id}/{key}")]
         public HttpResponseMessage PostUserEntitySetting(Setting setting)
         {
+            setting.Level = "User";
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
