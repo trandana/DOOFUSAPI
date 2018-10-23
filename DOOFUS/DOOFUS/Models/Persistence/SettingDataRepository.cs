@@ -41,6 +41,40 @@ namespace DOOFUS.Models.Persistence
                 return session.Get<Setting>(id);
         }
 
+        public Setting GetUserSetting(int CustomerId, string Username)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c => c.UserName == Username&&c.CustomerId== CustomerId).FirstOrDefault();
+        }
+
+        public Setting GetUserSetting(int CustomerId,int DeviceId, int EntityId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>()
+                    .Where(c => c.Id == EntityId && c.CustomerId == CustomerId && c.DeviceId == DeviceId)
+                    .FirstOrDefault();
+        }
+
+        public Setting GetDeviceSetting(int CustomerId, int DeviceId, int EntityId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>()
+                    .Where(c => c.Id == EntityId && c.CustomerId == CustomerId && c.DeviceId == DeviceId)
+                    .FirstOrDefault();
+        }
+
+        public Setting GetDeviceSetting(int CustomerId, string key)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c=>c.CustomerId==CustomerId&&c.SettingKey==key).FirstOrDefault();
+        }
+
+        public Setting GetCustomerSetting(string key)
+        {
+            using(var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c => c.SettingKey == key).FirstOrDefault();
+        }
+
         public IEnumerable<Setting> GetAll()
         {
             using (var session = NHibernateHelper.OpenSession())

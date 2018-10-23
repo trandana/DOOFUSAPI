@@ -9,6 +9,11 @@ namespace DOOFUS.Models.Persistence
     interface ISettingsRepository
     {
         Setting Get(int id);
+        Setting GetUserSetting(int CustomerId, string Username);
+        Setting GetUserSetting(int CustomerId, int DeviceId, int EntityId);
+        Setting GetDeviceSetting(int CustomerId, int DeviceId, int EntityId);
+        Setting GetDeviceSetting(int CustomerId, string key);
+        Setting GetCustomerSetting(string key);
         IEnumerable<Setting> GetAll();
         Setting Add(Setting setting);
         void Delete(int id);
