@@ -7,7 +7,7 @@ namespace DOOFUS.Models.Persistence
 {
     public class SettingDataRepository : ISettingsRepository
     {
-        //Query Goes here
+        //Add setting
         public Setting Add(Setting setting)
         {
             using (var session = NHibernateHelper.OpenSession())
@@ -21,6 +21,7 @@ namespace DOOFUS.Models.Persistence
             }
         }
         
+        //Delete specific setting
         public void Delete(int id)
         {
             var setting = Get(id);
@@ -33,66 +34,9 @@ namespace DOOFUS.Models.Persistence
                     transaction.Commit();
                 }
             }
-        }        
-        
-        public Setting Get(int id)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Get<Setting>(id);
         }
 
-        public Setting GetUserSetting(int CustomerId, string Username)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.UserName == Username&&c.CustomerId== CustomerId).FirstOrDefault();
-        }
-
-        public Setting GetUserSetting(int CustomerId,int DeviceId, int EntityId)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>()
-                    .Where(c => c.Id == EntityId && c.CustomerId == CustomerId && c.DeviceId == DeviceId)
-                    .FirstOrDefault();
-        }
-
-        public Setting GetDeviceSetting(int CustomerId, int DeviceId, int EntityId)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>()
-                    .Where(c => c.Id == EntityId && c.CustomerId == CustomerId && c.DeviceId == DeviceId)
-                    .FirstOrDefault();
-        }
-
-        public Setting GetDeviceSetting(int CustomerId, string key)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c=>c.CustomerId==CustomerId&&c.SettingKey==key).FirstOrDefault();
-        }
-
-        public Setting GetCustomerSetting(string key)
-        {
-            using(var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.SettingKey == key).FirstOrDefault();
-        }
-
-        public Setting GetCustomerSetting(int EntityId,string key)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.SettingKey == key&&c.Id==EntityId).FirstOrDefault();
-        }
-
-        public Setting GetGlobalSetting(String key)
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.SettingKey == key).FirstOrDefault();
-        }
-
-        public IEnumerable<Setting> GetAll()
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().ToList();
-        }
-
+        //Update a setting
         public bool Update(Setting setting)
         {
             using (var session = NHibernateHelper.OpenSession())
@@ -114,5 +58,62 @@ namespace DOOFUS.Models.Persistence
                 return true;
             }
         }
+
+        //Get a specified setting
+        public Setting Get(int id)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Get<Setting>(id);
+        }
+
+        //Get a list of all user settings for a given username
+        public IEnumerable<Setting> GetUserSettings(int CustomerId, string UserName)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>()
+                    .Where(c => c.Id == EntityId && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
+        }      
+
+        public IEnumerable<Setting> GetDeviceSettings(int CustomerId, int DeviceId)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>()
+                    .Where(c => c.DeviceId == DeviceId && c.CustomerId == CustomerId).ToList();                    
+        }
+
+        //Whats the setting for a specific settingkey for a specific device, at a given customer?
+        public Setting GetDeviceSetting(int CustomerId, int DeviceId, string key)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>()
+                    .Where(c=> c.CustomerId == CustomerId && c.SettingKey == key && c.DeviceId == DeviceId).FirstOrDefault();
+        }
+
+        //Get all customer level settings matching specific setting key
+        public IEnumerable<Setting> GetCustomerSettings(string key)
+        {
+            using(var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c => c.SettingKey == key && c.Level == "Customer").ToList();
+        }
+
+        public Setting GetCustomerSetting(int CustomerId, string key)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c => c.SettingKey == key&&c.Id==EntityId).FirstOrDefault();
+        }
+
+        public Setting GetGlobalSetting(string key)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c => c.SettingKey == key).FirstOrDefault();
+        }
+
+        public IEnumerable<Setting> GetAll()
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().ToList();
+        }
+
+        
     }
 }
