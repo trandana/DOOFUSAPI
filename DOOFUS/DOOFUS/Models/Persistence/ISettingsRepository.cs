@@ -11,6 +11,7 @@ namespace DOOFUS.Models.Persistence
         Setting Add(Setting setting);
         void Delete(int id);
         Setting Get(int id);
+        bool SaveOrUpdate(Setting setting);
         bool Update(Setting setting);
         IEnumerable<Setting> GetUserSettings(int CustomerId, string UserName);        
         IEnumerable<Setting> GetDeviceSettings(int CustomerId, int DeviceId);
@@ -18,7 +19,8 @@ namespace DOOFUS.Models.Persistence
         IEnumerable<Setting> GetCustomerSettings(string key);
         Setting GetCustomerSetting(int CustomerId, string key);
         Setting GetGlobalSetting(string key);
-        IEnumerable<Setting> GetAll();        
+        IEnumerable<Setting> GetAll();
+        Setting Get();
         
     }
 }

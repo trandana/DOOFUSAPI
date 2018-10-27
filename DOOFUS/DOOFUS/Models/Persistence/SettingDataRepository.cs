@@ -36,8 +36,8 @@ namespace DOOFUS.Models.Persistence
             }
         }
 
-        //Update a setting
-        public bool Update(Setting setting)
+        //Update a setting or save a setting if it doesnt exist
+        public bool SaveOrUpdate(Setting setting)
         {
             using (var session = NHibernateHelper.OpenSession())
             {
@@ -57,6 +57,27 @@ namespace DOOFUS.Models.Persistence
                 }
                 return true;
             }
+        }
+
+        //Only update a setting if it already exists
+        public bool Update(Setting setting)
+        {
+            using (var session = Nhibernate.OpenSession())
+            {
+                using (var transaction = session.BeginTransaction())
+                {
+                    session.Update(setting);
+                    try
+                    {
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+                return true;
+            }            
         }
 
         //Get a specified setting
@@ -114,6 +135,12 @@ namespace DOOFUS.Models.Persistence
                 return session.Query<Setting>().ToList();
         }
 
-        
+        public Setting Get()
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().ToList();
+        }
+
+
     }
 }
