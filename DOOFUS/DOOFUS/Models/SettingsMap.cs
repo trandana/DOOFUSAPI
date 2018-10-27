@@ -22,11 +22,11 @@ namespace DOOFUS.Models
             Map(x => x.StartEffectiveDate).Not.Nullable();
             Map(x => x.EndEffectiveDate);
             Map(x => x.CreatedTimeStamp);
-            Map(x => x.LastModifiedTimeStamp);
+            Map(x => x.LastModifiedTimeStamp).Not.Nullable();
             Map(x => x.LastModifiedBy);
             Map(x => x.LastModifiedById);
             Map(x => x.Value).Not.Nullable();
-            Map(x => x.Level);
+            Map(x => x.Level).Not.Nullable();
         }
     }
 }

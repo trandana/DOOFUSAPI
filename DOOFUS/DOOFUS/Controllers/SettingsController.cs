@@ -14,6 +14,11 @@ namespace DOOFUS.Nhbnt.Web.Controllers
     {
         static readonly ISettingsRepository settingRepository = new SettingDataRepository();
 
+        public const string GLOBAL = "Global";
+        public const string CUSTOMER = "Customer";
+        public const string USER = "User";
+        public const string DEVICE = "Device";
+
         //GET a global setting
         [Route("settings/global")]
         public IEnumerable<Setting> GetGlobalSettingData()
@@ -23,23 +28,23 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Get all settings for specific customer
         [Route("settings/customer/{customerId}")]
-        public IEnumerable<Setting> GetCustomerSettingData(int customerId)
+        public IEnumerable<Setting> GetCustomerSettingData(string customerId)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.Level == "Customer");
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.Level == CUSTOMER);
         }
 
         //Get all settings for a specific device
         [Route("settings/device/{customerId}/{deviceId}")]
-        public IEnumerable<Setting> GetDeviceSettingData(int customerId, int deviceId)
+        public IEnumerable<Setting> GetDeviceSettingData(string customerId, string deviceId)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId && d.Level == "Device");
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId && d.Level == DEVICE);
         }
 
         //Get all settigns for a specific username
         [Route("settings/user/{customerId}/{userName}")]
-        public IEnumerable<Setting> GetUserSettingData(int customerId, string userName)
+        public IEnumerable<Setting> GetUserSettingData(string customerId, string userName)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName && d.Level == "User");
+            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName && d.Level == DEVICE);
         }
 
         //Get setting
@@ -80,13 +85,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global")]
         public HttpResponseMessage PostGlobalSetting(Setting setting)
         {
-            setting.Level = "Global";
+            setting.Level = GLOBAL;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
 
             var uri = Url.Link("Global", new { id = setting.Id });
-            //response.Headers.Location = new Uri(uri); 
+            response.Headers.Location = new Uri(uri); 
 
             return response;
         }
@@ -95,7 +102,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostGlobalSettingOverride(Setting setting)
         {
-            setting.Level = "Global";       
+            setting.Level = GLOBAL;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
             
             //Get list of existing settings which match the incoming one, if any
             var SettingList = settingRepository.GetAll()
@@ -129,26 +138,24 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{key}/{overrideLower}")]
         public HttpResponseMessage PostGlobalEntitySetting(Setting setting, string customerids, string key, bool overrideLower)
         {
-            setting.Level = "Global";
+            setting.Level = GLOBAL;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
             //separate customer id string into individual ints
-            var separated = customerids.Split(new char[] { ',' });
-            List<int> parsed = separated.Select(s => int.Parse(s)).ToList();
+            var separated = customerids.Split( ',' );            
 
             //override was specified so override lower levels
             if (overrideLower)
             {
-                foreach (var id in parsed)
+                foreach (var id in separated)
                 {
                     //Get list of existing settings for customer and lower levels which match the incoming one, if any
                     var SettingList = settingRepository.GetAll()
                         .Where(c => c.SettingKey == setting.SettingKey && c.CustomerId == id).ToList();
 
                     foreach (var c in SettingList) 
-                    {                        
-                        setting.CustomerId = id;
-                        setting.DeviceId = c.DeviceId;
-                        setting.UserName = c.UserName;
+                    {                       
                         //delete the existing entries
                         settingRepository.Delete(c.Id);
                         //add new entries
@@ -160,14 +167,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //Override was not specified, don't override lower levels
             else
             {
-                foreach (var id in parsed)
+                foreach (var id in separated)
                 {
                     setting.CustomerId = id;
                     settingRepository.Add(setting);
                 }
             }
 
-            foreach (var id in parsed)
+            foreach (var id in separated)
             {
                 setting.CustomerId = id;
                 settingRepository.Add(setting);
@@ -183,15 +190,17 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Post a global setting - Specific customer id with option to override lower levels
         [Route("settings/global/{customerid}/{key}/{overrideLower=true}")]
-        public HttpResponseMessage PostGlobalEntitySettingOverride(Setting setting, string entityid, string key)
+        public HttpResponseMessage PostGlobalEntitySettingOverride(Setting setting, string customerid, string key)
         {
-            setting.Level = "Global";
+            setting.Level = GLOBAL;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
             //Get list of existing settings which match the incoming one, if any
             var SettingList = settingRepository.GetAll()
-               .Where(c => c.SettingKey == key && c.Id == entityid).ToList();
+               .Where(c => c.SettingKey == key && c.CustomerId == customerid).ToList();
 
-            if (SettingList > 0)
+            if (SettingList.Count() > 0)
             {
                 foreach (var c in SettingList)
                 {
@@ -216,21 +225,22 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{key}")]
         public HttpResponseMessage PostCustomerSetting(Setting setting, string key)
         {
-            setting.Level = "Customer";
+            setting.Level = CUSTOMER;
+            setting.LastModifiedBy = CUSTOMER;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
             //Get all setting matching this key at customer level
             var SettingList = settingRepository.GetAll()
-              .Where(c => c.SettingKey == key && c.Level == "Customer").ToList();
+              .Where(c => c.SettingKey == key && c.Level == CUSTOMER).ToList();
 
             //Setting exists. Delete it before adding new
-            if(SettingList > 0)
+            if(SettingList.Count() > 0)
             {
                 foreach (var c in SettingList)
                 {
                     settingRepository.Delete(c.Id);
                     settingRepository.Add(setting);
-                }
-                
+                }                
             }
             //Setting does not exist. Just add new
             else
@@ -250,17 +260,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostCustomerSettingOverride(Setting setting, string key, bool overrideLower)
         {
-            setting.Level = "Customer";
+            //Customer level override
+            setting.Level = CUSTOMER;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
             //Get all settings matching this key at Customer level or lower
             var SettingList = settingRepository.GetAll()
-              .Where(c => c.SettingKey == key && c.Level == "Customer" || c.Level == "User" || c.Level == "Device").ToList();
-
+              .Where(c => c.SettingKey == key && c.Level == CUSTOMER).ToList(); 
+            
             //Setting exists. Delete it before adding new
-            if (SettingList > 0)
+            if (SettingList.Count() > 0)
             {
                 foreach (var c in SettingList)
-                {
+                {                    
                     settingRepository.Delete(c.Id);
                     settingRepository.Add(setting);
                 }                
@@ -269,7 +282,51 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             else
             {
                 settingRepository.Add(setting);
-            }           
+            }
+
+            setting.Level = "User";
+            SettingList = settingRepository.GetAll()
+              .Where(c => c.SettingKey == key && c.Level == "User").ToList();            
+
+            //Setting exists. Delete it before adding new
+            if (SettingList.Count() > 0)
+            {
+                foreach (var c in SettingList)
+                {                   
+                    setting.DeviceId = c.DeviceId;
+                    setting.UserName = c.UserName;                    
+                    settingRepository.Delete(c.Id);
+                    settingRepository.Add(setting);
+                }
+            }
+            //Setting does not exist. Just add new
+            else
+            {
+                settingRepository.Add(setting);
+            }
+
+            //Device level override
+            setting.Level = "Device";
+
+            SettingList = settingRepository.GetAll()
+              .Where(c => c.SettingKey == key && c.Level == "Device").ToList();
+
+            //Setting exists. Delete it before adding new
+            if (SettingList.Count() > 0)
+            {
+                foreach (var c in SettingList)
+                {
+                    setting.DeviceId = c.DeviceId;
+                    setting.UserName = c.UserName;
+                    settingRepository.Delete(c.Id);
+                    settingRepository.Add(setting);
+                }
+            }
+            //Setting does not exist. Just add new
+            else
+            {
+                settingRepository.Add(setting);
+            }
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
 
@@ -281,18 +338,32 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Post a setting for a specific customer - do not override lower levels
         [Route("settings/customer/{customerid}/{key}")]
-        public HttpResponseMessage PostCustomerEntitySetting(Setting setting)
+        public HttpResponseMessage PostCustomerEntitySetting(Setting setting, string customerid, string key)
         {
-            setting.Level = "Customer";
-            settingRepository.Add(setting);
+            //Customer level
+            setting.Level = CUSTOMER;
+            setting.CustomerId = customerid;
+            int.TryParse(customerid, out int custIDFromString);
+            setting.LastModifiedById = custIDFromString;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
-            //Get all settings matching this key at Customer level with this entity id
+            //Get all settings matching this key at Customer level with this customer id
             var SettingList = settingRepository.GetAll()
-              .Where(c => c.SettingKey == key && c.Level == "Customer").ToList();
+              .Where(c => c.SettingKey == key && c.Level == CUSTOMER && c.CustomerId == customerid).ToList();
 
-            foreach (var c in SettingList)
+            //Setting exists. Delete it before adding new
+            if (SettingList.Count() > 0)
             {
-
+                foreach (var c in SettingList)
+                {
+                    settingRepository.Delete(c.Id);
+                    settingRepository.Add(setting);
+                }
+            }
+            //Setting does not exist. Just add new
+            else
+            {
+                settingRepository.Add(setting);
             }
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -306,28 +377,68 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //Post a setting for specific customer and override lower levels
         [Route("settings/customer/{customerid}/{key}/{overrideLower=true}")]
         public HttpResponseMessage PostCustomerEntitySettingOverride(Setting setting, string customerid, string key)
-        {    
-            //add new setting
-            settingRepository.Add(setting); 
+        {
+            //Customer level
+            setting.Level = CUSTOMER;            
+            setting.CustomerId = customerid;
+            int.TryParse(customerid, out int custIDFromString);
+            setting.LastModifiedById = custIDFromString;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
+            //Override customer level
             //Get all settings for this customer and this customer's lower levels which match this key
             var SettingList = settingRepository.GetAll()
-              .Where(c => c.SettingKey == key && c.CustomerId = customerid).ToList();
+              .Where(c => c.SettingKey == key && c.CustomerId == customerid && c.Level == CUSTOMER).ToList();
            
-            //Override lower levels
-            if (SettingList.count > 0)
+            //Override customer level
+            if (SettingList.Count() > 0)
             {
                 foreach (var c in SettingList)
                 {
-                    setting.DeviceId = c.DeviceId;
-                    setting.UserName = c.UserName;
-                    if(!settingRepository.Update(setting))
-                    {
-                        success = false;
+                    if (!settingRepository.Update(setting))
+                    {                        
                         settingRepository.Add(setting);
                     }
                 }
             }
+
+            //override user level           
+            SettingList = settingRepository.GetAll()
+              .Where(c => c.SettingKey == key && c.CustomerId == customerid && c.Level == USER).ToList();
+
+            //Override user level and add entry
+            if (SettingList.Count() > 0)
+            {
+                foreach (var c in SettingList)
+                {
+                    setting.DeviceId = c.DeviceId;
+                    setting.UserName = c.UserName;                    
+
+                    if (!settingRepository.Update(setting))
+                    {                        
+                        settingRepository.Add(setting);
+                    }
+                }
+            }
+
+            //override device level           
+            SettingList = settingRepository.GetAll()
+              .Where(c => c.SettingKey == key && c.CustomerId == customerid && c.Level == DEVICE).ToList();
+
+            //Override device level and add entry
+            if (SettingList.Count() > 0)
+            {
+                foreach (var c in SettingList)
+                {
+                    setting.DeviceId = c.DeviceId;                    
+
+                    if (!settingRepository.Update(setting))
+                    {
+                        settingRepository.Add(setting);
+                    }
+                }
+            }
+
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
 
             var uri = Url.Link("CustomerEntityOverride", new { id = setting.Id });
@@ -345,16 +456,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/device/{customerid}/{key}")]
         public HttpResponseMessage PostDeviceSetting(Setting setting, string customerid, string key, string deviceids)
         {
-            setting.Level = "Device";
+            setting.Level = DEVICE;
             setting.CustomerId = customerid;
             setting.SettingKey = key;           
 
-            //separate device id string into individual ints
-            var seperated = deviceids.Split(new char[] { ',' });
-            List<int> parsed = seperated.Select(s => int.Parse(s)).ToList();
+            //separate device id string into individual strings
+            var seperated = deviceids.Split(',');            
             
             //Post setting for each device
-            foreach (var c in parsed)
+            foreach (var c in seperated)
             {
                 setting.DeviceId = c;
                 settingRepository.Add(setting);
@@ -368,12 +478,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }       
 
-        //Post a device setting for specific entity
+        //Post a device setting for specific device
         [Route("settings/device/{customerid}/{deviceid}/{key}")]
-        public HttpResponseMessage PostDeviceEntitySetting(Setting setting, string deviceid, string key)
+        public HttpResponseMessage PostDeviceEntitySetting(Setting setting, string customerid, string deviceid, string key)
         {            
             setting.DeviceId = deviceid;
             setting.SettingKey = key;
+            int.TryParse(customerid, out int custIDFromString);
+            setting.LastModifiedById = custIDFromString;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
 
             setting = settingRepository.Add(setting);
 
@@ -391,9 +504,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Post a user setting 
         [Route("settings/user/{customerid}/{username}/{key}")]
-        public HttpResponseMessage PostUserSetting(Setting setting)
+        public HttpResponseMessage PostUserSetting(Setting setting, string customerid, string username, string key)
         {
-            setting.Level = "User";
+            setting.Level = USER;
+            setting.SettingKey = key;
+            setting.LastModifiedBy = username;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
             setting = settingRepository.Add(setting);
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
@@ -404,12 +520,34 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //Post a user setting for specific user
+        //Post a user setting for specific user and override lower
         [Route("settings/user/{customerid}/{username}/{key}")]
-        public HttpResponseMessage PostUserEntitySetting(Setting setting)
+        public HttpResponseMessage PostUserEntitySetting(Setting setting, string customerid, string username, string key)
         {
-            setting.Level = "User";
+            setting.Level = USER;
+            setting.SettingKey = key;
+            setting.UserName = username;
+            setting.LastModifiedBy = username;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
             setting = settingRepository.Add(setting);
+
+            //override setting for all devices used by this user           
+            var SettingList = settingRepository.GetAll()
+              .Where(c => c.SettingKey == key && c.CustomerId == customerid && (c.Level == USER || c.Level == DEVICE) && c.UserName == username).ToList();
+            
+            //Override user level and device level 
+            if (SettingList.Count() > 0)
+            {
+                foreach (var c in SettingList)
+                {
+                    setting.DeviceId = c.DeviceId;
+
+                    if (!settingRepository.Update(setting))
+                    {
+                        settingRepository.Add(setting);
+                    }
+                }
+            }
 
             var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
 
@@ -417,9 +555,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             response.Headers.Location = new Uri(uri);
 
             return response;
-        }
-
-       
+        }       
 
 
         //
@@ -467,7 +603,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put global with option to override 
-        [Route("settings/global/{key}/{overrideLower?}")]
+        [Route("settings/global/{key}/{overrideLower=true}")]
         public HttpResponseMessage PutGlobalSettingOverride(string key, Setting setting, bool overrideLower)
         {
             //get all global settings with same key
@@ -512,14 +648,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //Put setting - Specific Entity (global)
-        [Route("settings/global/{entityId}/{key}/{overrideLower?}")]
-        public HttpResponseMessage PutGlobalEntitySetting(int entityId, string key, Setting setting, bool overrideLower= false)
+        //Put setting - Specific Customer (global)
+        [Route("settings/global/{customerId}/{key}/{overrideLower=true}")]
+        public HttpResponseMessage PutGlobalEntitySetting(string customerId, string key, Setting setting, bool overrideLower= false)
         {
             //Using first item in list because only one item should return from this query
-            var currentSetting = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key).ToList()[0];
+            var SettingsList = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key).ToList()[0];
 
-            if (currentSetting == null)
+            if (SettingsList == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
