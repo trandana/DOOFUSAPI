@@ -12,9 +12,9 @@ namespace DOOFUS.Models
 
         public virtual string SettingKey { get; set; }
         
-        public virtual string CustomerId { get; set; }
+        public virtual int CustomerId { get; set; }
 
-        public virtual string DeviceId { get; set; }
+        public virtual int DeviceId { get; set; }
 
         public virtual string UserName { get; set; }
         

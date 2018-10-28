@@ -93,7 +93,34 @@ namespace DOOFUS.Models.Persistence
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
                     .Where(c => c.Id == EntityId && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
-        }      
+        }
+
+        public Setting GetUserSetting(int CustomerId, string key, string UserName)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>()
+                    .Where(c => c.SettingKey == key && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
+        }
+
+        //Check if a specific user setting exists
+        public bool DoesUserSettingExist(int CustomerId, string key, string UserName)
+        {
+            Setting temp = null;
+            using (var session = NHibernateHelper.OpenSession())
+            {
+                temp = session.Query<Setting>()
+                                    .Where(c => c.SettingKey == key && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
+            }               
+
+            if (temp != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         public IEnumerable<Setting> GetDeviceSettings(int CustomerId, int DeviceId)
         {
@@ -103,7 +130,7 @@ namespace DOOFUS.Models.Persistence
         }
 
         //Whats the setting for a specific settingkey for a specific device, at a given customer?
-        public Setting GetDeviceSetting(int CustomerId, int DeviceId, string key)
+        public Setting GetDeviceSetting(int CustomerId, string key, int DeviceId)
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
@@ -116,6 +143,8 @@ namespace DOOFUS.Models.Persistence
             using(var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>().Where(c => c.SettingKey == key && c.Level == "Customer").ToList();
         }
+
+        
 
         public Setting GetCustomerSetting(int CustomerId, string key)
         {
