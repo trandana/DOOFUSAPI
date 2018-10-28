@@ -211,6 +211,7 @@
     <Compile Include="Helper\NHibernateHelper.cs" />
     <Compile Include="Models\Persistence\ISettingsRepository.cs" />
     <Compile Include="Models\Persistence\SettingDataRepository.cs" />
+    <Compile Include="Models\GetResponse.cs" />
     <Compile Include="Models\Setting.cs" />
     <Compile Include="Models\SettingsBase.cs" />
     <Compile Include="Models\SettingsMap.cs" />

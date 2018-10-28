@@ -129,7 +129,7 @@ namespace DOOFUS.Models.Persistence
         public IEnumerable<Setting> GetCustomerSettings(string key)
         {
             using(var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.SettingKey == key && c.Level == "Customer").ToList();
+                return session.Query<Setting>().Where(c => c.SettingKey == key && c.Level == CUSTOMER).ToList();
         }        
 
         //Get specific customer setting which matches this key
@@ -145,12 +145,18 @@ namespace DOOFUS.Models.Persistence
                 return session.Query<Setting>().Where(c => c.SettingKey == key).FirstOrDefault();
         }
 
+        public IEnumerable<Setting> GetGlobalSetting()
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(d => d.Level == GLOBAL).ToList();
+        }
+
         public IEnumerable<Setting> GetAll()
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>().ToList();
         }
-        
+
 
 
     }

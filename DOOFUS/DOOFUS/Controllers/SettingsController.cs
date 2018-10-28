@@ -21,9 +21,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //GET a global setting
         [Route("settings/global")]
-        public IEnumerable<Setting> GetGlobalSettingData()
+        public GetResponse GetGlobalSettingData()
         {
-            return settingRepository.GetAll().Where(d => d.Level == "Global");
+            var response = new GetResponse();
+            response.Level = GLOBAL;
+            response.Settings = settingRepository.GetGlobalSetting();
+            return response;
         }
 
         //Get all settings for specific customer
