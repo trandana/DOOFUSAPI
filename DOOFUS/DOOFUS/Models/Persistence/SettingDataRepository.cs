@@ -7,6 +7,11 @@ namespace DOOFUS.Models.Persistence
 {
     public class SettingDataRepository : ISettingsRepository
     {
+        public const string GLOBAL = "Global";
+        public const string CUSTOMER = "Customer";
+        public const string USER = "User";
+        public const string DEVICE = "Device";
+
         //Add setting
         public Setting Add(Setting setting)
         {
@@ -62,7 +67,7 @@ namespace DOOFUS.Models.Persistence
         //Only update a setting if it already exists
         public bool Update(Setting setting)
         {
-            using (var session = Nhibernate.OpenSession())
+            using (var session = NHibernateHelper.OpenSession())
             {
                 using (var transaction = session.BeginTransaction())
                 {
@@ -92,36 +97,19 @@ namespace DOOFUS.Models.Persistence
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
-                    .Where(c => c.Id == EntityId && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
+                    .Where(c => c.UserName == UserName && c.CustomerId == CustomerId).ToList();
         }
+
+        
 
         public Setting GetUserSetting(int CustomerId, string key, string UserName)
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
-                    .Where(c => c.SettingKey == key && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
+                    .Where(c => c.SettingKey == key && c.UserName == UserName && c.CustomerId == CustomerId).FirstOrDefault();
         }
 
-        //Check if a specific user setting exists
-        public bool DoesUserSettingExist(int CustomerId, string key, string UserName)
-        {
-            Setting temp = null;
-            using (var session = NHibernateHelper.OpenSession())
-            {
-                temp = session.Query<Setting>()
-                                    .Where(c => c.SettingKey == key && c.UserName == UserName && c.CustomerId == CustomerId).ToList();
-            }               
-
-            if (temp != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
+       
         public IEnumerable<Setting> GetDeviceSettings(int CustomerId, int DeviceId)
         {
             using (var session = NHibernateHelper.OpenSession())
@@ -142,14 +130,13 @@ namespace DOOFUS.Models.Persistence
         {
             using(var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>().Where(c => c.SettingKey == key && c.Level == "Customer").ToList();
-        }
+        }        
 
-        
-
+        //Get specific customer setting which matches this key
         public Setting GetCustomerSetting(int CustomerId, string key)
         {
             using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.SettingKey == key&&c.Id==EntityId).FirstOrDefault();
+                return session.Query<Setting>().Where(c => c.SettingKey == key && c.SettingKey == key && c.Level == CUSTOMER).FirstOrDefault();
         }
 
         public Setting GetGlobalSetting(string key)
@@ -163,12 +150,7 @@ namespace DOOFUS.Models.Persistence
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>().ToList();
         }
-
-        public Setting Get()
-        {
-            using (var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().ToList();
-        }
+        
 
 
     }
