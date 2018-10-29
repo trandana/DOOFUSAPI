@@ -12,15 +12,15 @@ namespace DOOFUS.Models
 
         public virtual string SettingKey { get; set; }
         
-        public virtual int CustomerId { get; set; }
+        public virtual int? CustomerId { get; set; } //nullable
 
-        public virtual int DeviceId { get; set; }
+        public virtual int? DeviceId { get; set; } //nullable
 
         public virtual string UserName { get; set; }
         
         public virtual DateTime StartEffectiveDate { get; set; }
 
-        public virtual DateTime EndEffectiveDate { get; set; }
+        public virtual DateTime? EndEffectiveDate { get; set; } //nullable
 
         public virtual DateTime CreatedTimeStamp { get; set; }
 
