@@ -1137,6 +1137,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
+        //all below are done,need to test
+
         //Delete a setting at customer level and override all lower levels also
         [Route("settings/customer/{customerid}/{key}/{overrideLower=true}")]
         public HttpResponseMessage DeleteCustomerSettingOverride(int customerid, string key)
@@ -1151,7 +1153,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //subject to change, override lower
             var SettingList = settingRepository.GetAll()
-                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key).ToList();
+                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key(c.Level == USER || c.Level == DEVICE)).ToList();
             if (SettingList.Count!=0)
             {
                 foreach (var c in SettingList)
@@ -1209,7 +1211,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             settingRepository.Delete(setting.Id);
             //subject to change, override lower
             var SettingList = settingRepository.GetAll()
-                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key).ToList();
+                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key&&(c.Level==USER||c.Level==DEVICE)).ToList();
             if (SettingList.Count != 0)
             {
                 foreach (var c in SettingList)
@@ -1227,24 +1229,34 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Delete a setting at device level
-        [Route("settings/device/{CustomerId}/{key}")]
-        public HttpResponseMessage DeleteDeviceSetting(int customerid, int deviceid, string key)
+        [Route("settings/device/{CustomerId}/{key}/{deviceIds}")]
+        public HttpResponseMessage DeleteDeviceSetting(int customerid, String deviceids, string key)
         {
-            var setting = settingRepository.GetDeviceSetting(customerid, key, deviceid);
-
-            if (setting == null)
+            var divided = deviceids.Split(',');
+            foreach (var deviceIdString in divided)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                int deviceId=Int32.Parse(deviceIdString);
+                try
+                {
+                    var setting = settingRepository.GetDeviceSetting(customerid, key, deviceid);
+                    if (setting == null)
+                    {
+                        throw new HttpResponseException(HttpStatusCode.NotFound);
+                    }
+                    settingRepository.Delete(setting.Id);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-
-            settingRepository.Delete(setting.Id);
-
+            var response = Request.CreateResponse<String>(HttpStatusCode.OK, deviceids);
             return response;
         }
 
         //Delete a setting at device level for specific entity id 
-        [Route("settings/device/{CustomerId}/{deviceId}/{entityId}/{key}")]
+        [Route("settings/device/{CustomerId}/{deviceId}/{key}")]
         public HttpResponseMessage DeleteDeviceEntitySetting(int CustomerId, string key, int deviceId )
         {
             var setting = settingRepository.GetDeviceSetting(CustomerId, key, deviceId);
@@ -1264,24 +1276,35 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //DELETE User Level
         //
 
-        //Delete a setting at user level        
-        [Route("settings/user/{CustomerId}/{userId}")]
-        public HttpResponseMessage DeleteUserSetting(int CustomerId, string key, string Username)
+        //Delete mutiple setting at user level with usernames
+        //Assume usernames is string and divided by ',', ie: jody,alex
+        [Route("settings/user/{CustomerId}/{key}/{usernames}")]
+        public HttpResponseMessage DeleteUserSetting(int CustomerId, string key, string usernames)
         {
-            var setting = settingRepository.GetUserSetting(CustomerId, key, Username);
+            var divided = usernames.Split(',');
             
-            if (setting == null)
+            foreach (var username in divided)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                try
+                {
+                    var setting = settingRepository.GetUserSetting(CustomerId, key, Username);
+                    if (setting == null)
+                    {
+                        throw new HttpResponseException(HttpStatusCode.NotFound);
+                    }
+                    settingRepository.Delete(setting.Id);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK,setting);
-
-            settingRepository.Delete(setting.Id);
-
+            var response = Request.CreateResponse<String>(HttpStatusCode.OK, divided);
             return response;//delete the setting and return it
         }
 
-        //Delete a setting at user level for specific user id        
+        //Delete a setting at user level for specific username   
         [Route("settings/user/{CustomerId}/{username}/{key}")]
         public HttpResponseMessage DeleteUserEntitySetting(int customerid, string key, string username)
         {
