@@ -1153,7 +1153,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //subject to change, override lower
             var SettingList = settingRepository.GetAll()
-                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key(c.Level == USER || c.Level == DEVICE)).ToList();
+                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key&&(c.Level == USER || c.Level == DEVICE)).ToList();
             if (SettingList.Count!=0)
             {
                 foreach (var c in SettingList)
@@ -1238,7 +1238,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 int deviceId=Int32.Parse(deviceIdString);
                 try
                 {
-                    var setting = settingRepository.GetDeviceSetting(customerid, key, deviceid);
+                    var setting = settingRepository.GetDeviceSetting(customerid, key, deviceId);
                     if (setting == null)
                     {
                         throw new HttpResponseException(HttpStatusCode.NotFound);
@@ -1282,12 +1282,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         public HttpResponseMessage DeleteUserSetting(int CustomerId, string key, string usernames)
         {
             var divided = usernames.Split(',');
+            String LastUsername;
             
             foreach (var username in divided)
             {
+                LastUsername = username;
                 try
                 {
-                    var setting = settingRepository.GetUserSetting(CustomerId, key, Username);
+
+                    var setting = settingRepository.GetUserSetting(CustomerId, key, username);
                     if (setting == null)
                     {
                         throw new HttpResponseException(HttpStatusCode.NotFound);
@@ -1300,7 +1303,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     throw;
                 }
             }
-            var response = Request.CreateResponse<String>(HttpStatusCode.OK, divided);
+            var response = Request.CreateResponse<String>(HttpStatusCode.OK, LastUsername);
             return response;//delete the setting and return it
         }
 
