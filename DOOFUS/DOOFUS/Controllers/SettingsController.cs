@@ -1040,29 +1040,49 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at global level for specific entity id 
-        [Route("settings/global/{entity id}/{key}")]
-        public void DeleteGlobalEntitySetting(int id)
+        [Route("settings/global/{entity_id}/{key}")]
+        public HttpResponseMessage DeleteGlobalEntitySetting(int id,String key)
         {
-            var setting = settingRepository.Get(id);
+            var setting = settingRepository.GetGlobalSetting(id,key);
 
             if (setting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
             settingRepository.Delete(id);
+
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+            return response;
         }
 
         //Delete a setting at global level for specific entity and override all lower levels also
-        [Route("settings/global/{entity id}/{key}/{overrideLower=true}")]
-        public void DeleteGlobalEntitySettingOverride(int id)
+        [Route("settings/global/{entityId}/{key}/{overrideLower=true}")]
+        public HttpResponseMessage DeleteGlobalEntitySettingOverride(int id,String key)
         {
-            var setting = settingRepository.Get(id);
+            var setting = settingRepository.GetGlobalSetting(id,key);
 
             if (setting == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
             settingRepository.Delete(id);
+            
+            var SettingList = settingRepository.GetAll()
+                .Where(c => c.SettingKey==key&&(c.Level == CUSTOMER || c.Level == DEVICE || c.Level == USER)).ToList();
+            if (SettingList.Count==0)
+            {
+                var response = Request.CreateResponse(HttpStatusCode.Accepted, "No lower Level values found");
+                return response;
+            }
+            
+            foreach (var c in SettingList)
+            {
+                    settingRepository.Delete(c.Id);
+            }
+
+            var response2 = Request.CreateResponse(HttpStatusCode.Accepted, "No lower Level values found");
+            return response2;
+
         }
 
         //
@@ -1071,10 +1091,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Delete a setting at customer level for list of devices
         //settings/customer/{customerid}/{key}?username=jody,victor,etc
-        [Route("settings/customer/{customerid}/{key}")]
+        [Route("settings/customer/{customerid}/{key}/{deviceids}")]
         public HttpResponseMessage DeleteCustomerSetting(string key, int customerid, string deviceids)
         {
-            int dID;
             Setting setting = null;
 
             //separate device id string into individual strings
@@ -1085,7 +1104,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //Convert device id's from CSV list to integers, one at a time and delete their corresponding entries
             foreach (var i in separated)
             {
-                Int32.TryParse(i, out dID); 
+                Int32.TryParse(i, out int dID); 
                 var SettingList = settingRepository.GetAll()
                     .Where(c => c.SettingKey == key && c.DeviceId == dID && c.CustomerId == customerid);
 
@@ -1109,7 +1128,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Delete a setting at customer level for list of users
-        [Route("settings/customer/{customerid}/{key}")]
+        [Route("settings/customer/{customerid}/{key}/{usernames}")]
         public HttpResponseMessage DeleteUserSettings(string key, int customerid, string usernames)
         {
             var separated = usernames.Split(',');
@@ -1137,7 +1156,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //all below are done,need to test
+        
 
         //Delete a setting at customer level and override all lower levels also
         [Route("settings/customer/{customerid}/{key}/{overrideLower=true}")]
@@ -1303,7 +1322,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     throw;
                 }
             }
-            var response = Request.CreateResponse<String>(HttpStatusCode.OK, LastUsername);
+            var response = Request.CreateResponse<String>(HttpStatusCode.OK, "DELETED");
             return response;//delete the setting and return it
         }
 

@@ -144,6 +144,11 @@ namespace DOOFUS.Models.Persistence
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>().Where(c => c.SettingKey == key).FirstOrDefault();
         }
+        public Setting GetGlobalSetting(int Id,string key)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().Where(c => c.SettingKey == key&&c.Id==Id).FirstOrDefault();
+        }
 
         public IEnumerable<Setting> GetGlobalSetting()
         {
