@@ -31,23 +31,32 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Get all settings for specific customer
         [Route("settings/customer/{customerId}")]
-        public IEnumerable<Setting> GetCustomerSettingData(int customerId)
+        public GetResponse GetCustomerSettingData(int customerId)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.Level == CUSTOMER);
+            var response = new GetResponse();
+            response.Level = CUSTOMER;
+            response.Settings = settingRepository.GetCustomerSettings(customerId);
+            return response;
         }
 
         //Get all settings for a specific device
         [Route("settings/device/{customerId}/{deviceId}")]
-        public IEnumerable<Setting> GetDeviceSettingData(int customerId, int deviceId)
+        public GetResponse GetDeviceSettingData(int customerId, int deviceId)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.DeviceId == deviceId && d.Level == DEVICE);
+            var response = new GetResponse();
+            response.Level = DEVICE;
+            response.Settings = settingRepository.GetDeviceSettings(customerId, deviceId);
+            return response;
         }
 
         //Get all settigns for a specific username
         [Route("settings/user/{customerId}/{userName}")]
-        public IEnumerable<Setting> GetUserSettingData(int customerId, string userName)
+        public GetResponse GetUserSettingData(int customerId, string userName)
         {
-            return settingRepository.GetAll().Where(d => d.CustomerId == customerId && d.UserName == userName && d.Level == DEVICE);
+            var response = new GetResponse();
+            response.Level = USER;
+            response.Settings = settingRepository.GetUserSettings(customerId, userName);
+            return response;
         }
 
         //Get setting

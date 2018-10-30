@@ -97,7 +97,7 @@ namespace DOOFUS.Models.Persistence
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
-                    .Where(c => c.UserName == UserName && c.CustomerId == CustomerId).ToList();
+                    .Where(c => c.CustomerId == CustomerId && c.UserName == UserName && c.Level == DEVICE).ToList();
         }
 
         
@@ -114,7 +114,7 @@ namespace DOOFUS.Models.Persistence
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
-                    .Where(c => c.DeviceId == DeviceId && c.CustomerId == CustomerId).ToList();                    
+                    .Where(c => c.CustomerId == CustomerId && c.DeviceId == DeviceId && c.Level == DEVICE).ToList();                    
         }
 
         //Whats the setting for a specific settingkey for a specific device, at a given customer?
@@ -126,10 +126,10 @@ namespace DOOFUS.Models.Persistence
         }
 
         //Get all customer level settings matching specific setting key
-        public IEnumerable<Setting> GetCustomerSettings(string key)
+        public IEnumerable<Setting> GetCustomerSettings(int CustomerId)
         {
             using(var session = NHibernateHelper.OpenSession())
-                return session.Query<Setting>().Where(c => c.SettingKey == key && c.Level == CUSTOMER).ToList();
+                return session.Query<Setting>().Where(c => c.CustomerId == CustomerId && c.Level == CUSTOMER).ToList();
         }        
 
         //Get specific customer setting which matches this key
