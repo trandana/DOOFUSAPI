@@ -92,6 +92,21 @@ namespace DOOFUS.Models.Persistence
                 return session.Get<Setting>(id);
         }
 
+        //Check if setting already exists
+        public bool DoesSettingExist(Setting setting)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                if (session.Query<Setting>()
+                        .Where(c => c.SettingKey == setting.SettingKey && c.Level == setting.Level).FirstOrDefault() != null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }                
+        }
+
         //Get a list of all user settings for a given username
         public IEnumerable<Setting> GetUserSettings(int CustomerId, string UserName)
         {

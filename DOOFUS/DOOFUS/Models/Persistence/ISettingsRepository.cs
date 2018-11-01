@@ -13,6 +13,7 @@ namespace DOOFUS.Models.Persistence
         Setting Get(int id);
         bool SaveOrUpdate(Setting setting);        
         bool Update(Setting setting);
+        bool DoesSettingExist(Setting setting);
         IEnumerable<Setting> GetUserSettings(int CustomerId, string UserName);
         Setting GetUserSetting(int customerid, string key, string username);
         IEnumerable<Setting> GetDeviceSettings(int CustomerId, int DeviceId);
