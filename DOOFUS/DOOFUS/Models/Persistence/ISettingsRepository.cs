@@ -21,8 +21,8 @@ namespace DOOFUS.Models.Persistence
         IEnumerable<Setting> GetCustomerSettings(int CustomerId);
         Setting GetCustomerSetting(int CustomerId, string key);
         Setting GetGlobalSetting(string key);
-        Setting GetGlobalSetting(int id,string key);
-        IEnumerable<Setting> GetGlobalSetting();
+        Setting GetGlobalSetting(int id, string key);
+            IEnumerable<Setting> GetGlobalSetting();
         IEnumerable<Setting> GetAll();
         
         
