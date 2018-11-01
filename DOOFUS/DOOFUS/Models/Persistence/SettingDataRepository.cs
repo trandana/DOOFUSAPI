@@ -99,11 +99,11 @@ namespace DOOFUS.Models.Persistence
                 if (session.Query<Setting>()
                         .Where(c => c.SettingKey == setting.SettingKey && c.Level == setting.Level).FirstOrDefault() != null)
                 {
-                    return false;
+                    return true;
                 }
                 else
                 {
-                    return true;
+                    return false;
                 }                
         }
 
