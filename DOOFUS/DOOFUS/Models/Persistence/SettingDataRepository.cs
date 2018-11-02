@@ -41,7 +41,7 @@ namespace DOOFUS.Models.Persistence
             }
         }
 
-        //Update a setting or save a setting if it doesnt exist
+        //Update a setting if it exists or save a setting if it doesnt exist
         public bool SaveOrUpdate(Setting setting)
         {
             using (var session = NHibernateHelper.OpenSession())
