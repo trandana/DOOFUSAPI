@@ -97,16 +97,16 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Post a setting (global) 
         //**
-        [Route("settings/global")]
+        [Route("settings/global/{key}")]
         public HttpResponseMessage PostGlobalSetting(Setting setting)
         {
+            setting.Level = GLOBAL;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
+            setting.CreatedTimeStamp = DateTime.UtcNow;
+
             if (!settingRepository.DoesSettingExist(setting))
             {
-                setting.Level = GLOBAL;
-                setting.LastModifiedBy = GLOBAL;
-                setting.LastModifiedTimeStamp = DateTime.UtcNow;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-
                 setting = settingRepository.Add(setting);
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
