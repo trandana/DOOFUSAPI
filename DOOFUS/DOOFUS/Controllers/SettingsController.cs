@@ -1254,7 +1254,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         }//tested
 
-        //Not clear below
+        
 
         //Delete a setting at global level for specific entity id
         //Assumed entityID as ID for each row in the table 
@@ -1377,6 +1377,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         
 
         //Delete a setting at customer level and override all lower levels also
+        /*
         [Route("settings/customer/{customerid}/{key}/{overrideLower:bool}")]
         public HttpResponseMessage DeleteCustomerSettingOverride(int customerid, string key,bool overrideLower)
         {
@@ -1407,6 +1408,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             return response;
         }//test here
+        */
+
 
         //Delete a setting at customer level for specific user
         [Route("settings/customer/{customerid}/{username}/{key}")]
@@ -1440,9 +1443,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //Delete a setting at customer level for specific entity id and override all lower levels also
-        [Route("settings/customer/{entityId}/{key}/{overrideLower=true}")]
-        public HttpResponseMessage DeleteCustomerEntitySettingOverride(int entityId,string key)
+        //Delete a setting at customer level for specific entity id and override all lower levels also if true
+        //**
+        [Route("settings/customer/{entityId}/{key}/{overrideLower:bool?}")]
+        public HttpResponseMessage DeleteCustomerEntitySettingOverride(int entityId,string key,bool overrideLower=false)
         {
             var setting = settingRepository.GetCustomerSetting(entityId,key);
 
@@ -1452,18 +1456,29 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
             settingRepository.Delete(setting.Id);
             //subject to change, override lower
-            var SettingList = settingRepository.GetAll()
-                .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key&&(c.Level==USER||c.Level==DEVICE)).ToList();
-            if (SettingList.Count != 0)
+            if (overrideLower)
             {
-                foreach (var c in SettingList)
+                var SettingList = settingRepository.GetAll()
+                    .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key && (c.Level == USER || c.Level == DEVICE)).ToList();
+                if (SettingList.Count != 0)
                 {
-                    settingRepository.Delete(c.Id);
+                    foreach (var c in SettingList)
+                    {
+                        settingRepository.Delete(c.Id);
+                    }
                 }
-            }
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+                var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
 
-            return response;
+                return response;
+            }
+            else
+            {
+                var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
+
+                return response;
+            }
+
+
         }
 
         //
@@ -1564,30 +1579,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //Delete a setting at customer level 
-        //**
-        [Route("settings/customer/{CustomerId}/{key}/{overrideLower?}")]
-        public HttpResponseMessage DeleteCustomerSetting(int customerid, string key, bool overrideLower = false)
-        {
-            /*if (!overrideLower)
-            {*/
-                var setting = settingRepository.GetCustomerSetting(customerid, key);
-
-                if (setting == null)
-                {
-                    throw new HttpResponseException(HttpStatusCode.NotFound);
-                }
-                var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-                settingRepository.Delete(setting.Id);
-                return response;
-           /* }
-            else
-            {
-                //delete all lower
-                return;
-            }*/
-
-        }
+        
 
     }
 }
