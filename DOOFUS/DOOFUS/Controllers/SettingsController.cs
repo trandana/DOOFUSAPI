@@ -1189,7 +1189,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //Create HTTP response
-            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, currentSetting);
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.Created);
             return updatedResponse;
         }
 
@@ -1202,45 +1202,30 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //DELETE Global Level
         //
 
-        //Delete a setting global level
-        //**
-        [Route("settings/global/{key}")]
-        public HttpResponseMessage DeleteGlobalSetting(String key)
+        //Delete a setting at global level with option to delete all lower levels also
+
+        [Route("settings/global/{key}/{overrideLower:bool?}")]
+        public HttpResponseMessage DeleteGlobalSettingOverride(string key,bool overrideLower=false)
         {
+            
             var setting = settingRepository.GetGlobalSetting(key);
+
             if (setting == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return Request.CreateResponse(HttpStatusCode.NotFound);
             }
-            
+
             settingRepository.Delete(setting.Id);
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
 
-            return response;
-        }//tested
-
-        //Delete a setting at global level and delete all lower levels also
-
-        [Route("settings/global/{key}/{overrideLower:bool}")]
-        public HttpResponseMessage DeleteGlobalSettingOverride(string key,bool overrideLower)
-        {
             if (!overrideLower)
             {
-                var response = Request.CreateResponse(HttpStatusCode.Accepted, "Override lower is false");
-                return response;
+                return Request.CreateResponse(HttpStatusCode.OK, setting);
             }
-            var setting = settingRepository.GetGlobalSetting(key);
-
-            if (setting == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-            settingRepository.Delete(setting.Id);
 
             var SettingsList = settingRepository.GetAll().Where(c=>c.SettingKey==key&&(c.Level==USER||c.Level==CUSTOMER||c.Level==DEVICE)).ToList();
             if (SettingsList.Count == 0)
             {
-                var response = Request.CreateResponse(HttpStatusCode.Accepted, "No lower Level values found");
+                var response = Request.CreateResponse(HttpStatusCode.OK);
                 return response;
             }
 
@@ -1249,31 +1234,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 settingRepository.Delete(c.Id);
             }
 
-            var response2 = Request.CreateResponse(HttpStatusCode.Accepted, "Lower level deleted");
-            return response2;
+            return Request.CreateResponse(HttpStatusCode.OK);
 
         }//tested
 
-        
-
-        //Delete a setting at global level for specific entity id
-        //Assumed entityID as ID for each row in the table 
-        [Route("settings/global/{key}")]
-        public HttpResponseMessage DeleteGlobalEntitySetting( String key)
-        {
-            var setting = settingRepository.GetGlobalSetting( key);
-
-            if (setting == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-            settingRepository.Delete(setting.Id);
-
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-            return response;
-        }//tested
-
+        //Assumes don't need this
         //Delete a setting at global level for specific entity and override all lower levels also
+        /*
         [Route("settings/global/{key}/{overrideLower=true}")]
         public HttpResponseMessage DeleteGlobalEntitySettingOverride( String key)
         {
@@ -1302,17 +1269,66 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response2;
 
         }//tested
-
+        */
         //
         //DELETE Customer Level
         //
 
-        //Delete a setting at customer level for list of devices
-        //settings/customer/{customerid}/{key}?username=jody,victor,etc
+        //Delete a setting at customer level for specific entity id and override all lower levels also if true
+        //**
+
+        [Route("settings/customer/{entityId}/{key}/{overrideLower:bool?}")]
+        public HttpResponseMessage DeleteCustomerEntitySettingOverride(int entityId, string key, bool overrideLower = false)
+        {
+            var setting = settingRepository.GetCustomerSetting(entityId, key);
+
+            if (setting == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+            settingRepository.Delete(setting.Id);
+            
+            if (overrideLower)
+            {
+                var SettingList = settingRepository.GetAll()
+                    .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key && (c.Level == USER || c.Level == DEVICE)).ToList();
+                if (SettingList.Count != 0)
+                {
+                    foreach (var c in SettingList)
+                    {
+                        settingRepository.Delete(c.Id);
+                    }
+                }
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK);
+
+        }
+        //Delete a setting at customer level for specific user
+        [Route("settings/customer/{customerid}/{username}/{key}")]
+        public HttpResponseMessage DeleteCustomerEntitySetting(int customerid, string UserName, string key)
+        {
+            var setting = settingRepository.GetUserSetting(customerid, key, UserName);
+
+            if (setting == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+            settingRepository.Delete(setting.Id);
+            return Request.CreateResponse(HttpStatusCode.OK);
+        }
+
+        //Delete a setting at customer level for list of devices and override list of device level settings
+        //settings/customer/{customerid}/{key}?deviceids=1,2,etc
         [Route("settings/customer/{customerid}/{key}/device/{deviceids}")]
         public HttpResponseMessage DeleteCustomerSetting(string key, int customerid, string deviceids)
         {
-            
+
+            var setting = settingRepository.GetCustomerSetting(customerid, key);
+            if (setting==null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
 
             //separate device id string into individual strings
             var separated = deviceids.Split(',');
@@ -1326,37 +1342,37 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 var SettingList = settingRepository.GetAll()
                     .Where(c => c.SettingKey == key && c.DeviceId == dID && c.CustomerId == customerid&&c.Level==DEVICE);
 
-                if(settingRepository == null)
-                {
-                     throw new HttpResponseException(HttpStatusCode.NotFound);
-                }
-                else
+                if(settingRepository != null)
                 {
                     foreach (var set in SettingList)
                     {
                         settingRepository.Delete(set.Id);
-                    }                   
-                }                
-            } 
-            
-            //perhaps we can change this to a long list reponse later?
-            var response = Request.CreateResponse(HttpStatusCode.OK, "List of settings deleted");          
+                    }
+                    
+                }
+            }
+            return Request.CreateResponse(HttpStatusCode.OK);
 
-            return response;
         }//tested
 
         //Delete a setting at customer level for list of users
         [Route("settings/customer/{customerid}/{key}/user/{usernames}")]
         public HttpResponseMessage DeleteUserSettings(string key, int customerid, string usernames)
         {
+            var setting = settingRepository.GetCustomerSetting(customerid, key);
+            if (setting == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
             var separated = usernames.Split(',');
-            Setting setting = null;
+            Setting setting_ = null;
 
             if (separated.Count() > 0)
             {
                 foreach (var user in separated)
                 {
-                    if ((setting = settingRepository.GetUserSetting(customerid, key, user)) == null||setting.Level!=USER)
+                    if ((setting_ = settingRepository.GetUserSetting(customerid, key, user)) == null||setting.Level!=USER)
                     {
                         continue;
                     }
@@ -1367,7 +1383,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
             }            
             
-            var response = Request.CreateResponse(HttpStatusCode.OK, "Deleted for multiple user");
+            var response = Request.CreateResponse(HttpStatusCode.OK);
 
             
 
@@ -1411,22 +1427,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         */
 
 
-        //Delete a setting at customer level for specific user
-        [Route("settings/customer/{customerid}/{username}/{key}")]
-        public HttpResponseMessage DeleteCustomerEntitySetting(int customerid, string UserName, string key)
-        {
-            var setting = settingRepository.GetUserSetting(customerid, key, UserName);
-
-            if (setting == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-            settingRepository.Delete(setting.Id);
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-
-            return response;
-        }
-
+        
+        //Not needed? according to Victor
         //Delete a setting at customer level for specific device
         [Route("settings/customer/{customerid}/{deviceid}/{key}")]
         public HttpResponseMessage DeleteCustomerEntitySetting(int customerid, string key, int deviceId)
@@ -1443,53 +1445,22 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //Delete a setting at customer level for specific entity id and override all lower levels also if true
-        //**
-        [Route("settings/customer/{entityId}/{key}/{overrideLower:bool?}")]
-        public HttpResponseMessage DeleteCustomerEntitySettingOverride(int entityId,string key,bool overrideLower=false)
-        {
-            var setting = settingRepository.GetCustomerSetting(entityId,key);
-
-            if (setting == null)
-            {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
-            }
-            settingRepository.Delete(setting.Id);
-            //subject to change, override lower
-            if (overrideLower)
-            {
-                var SettingList = settingRepository.GetAll()
-                    .Where(c => c.CustomerId == setting.CustomerId && c.SettingKey == key && (c.Level == USER || c.Level == DEVICE)).ToList();
-                if (SettingList.Count != 0)
-                {
-                    foreach (var c in SettingList)
-                    {
-                        settingRepository.Delete(c.Id);
-                    }
-                }
-                var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-
-                return response;
-            }
-            else
-            {
-                var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-
-                return response;
-            }
-
-
-        }
+        
+       
 
         //
         //DELETE Device Level
         //
 
+
+        //fix this one
         //Delete a setting at device level
-        [Route("settings/device/{CustomerId}/{key}/{deviceIds}")]
-        public HttpResponseMessage DeleteDeviceSetting(int customerid, String deviceids, string key)
+        [Route("settings/device/{CustomerId}/{key}/{deviceIds}/{multiple:bool}")]
+        public HttpResponseMessage DeleteDeviceSetting(int customerid, String deviceids, string key,bool multiple)
         {
+
             var divided = deviceids.Split(',');
+
             foreach (var deviceIdString in divided)
             {
                 int deviceId=Int32.Parse(deviceIdString);
