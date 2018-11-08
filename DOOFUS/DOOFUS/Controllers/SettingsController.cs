@@ -711,23 +711,45 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //get setting to update by id
             var currentSetting = settingRepository.Get(id);
 
-            //if setting does not exist, add setting to DB
-            if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+            //replace current setting values with new setting values
+            //if a value is different in new setting object when compared to the current setting values, adjust accordingly
+            if (setting.CustomerId != currentSetting.CustomerId)
             {
-                setting.Level = GLOBAL;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-                settingRepository.Add(setting);
-                var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                return createdResponse;
+                currentSetting.CustomerId = setting.CustomerId;
             }
 
-            //replace current setting values with new setting values
-            currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            if (setting.DeviceId != currentSetting.DeviceId)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
             currentSetting.EndEffectiveDate = null;
             currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-            currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            currentSetting.LastModifiedById = setting.LastModifiedById;
-            currentSetting.Value = setting.Value;
 
             //update setting
             if (!settingRepository.Update(currentSetting))
@@ -737,7 +759,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, currentSetting);
             return updatedResponse;
-
         }
 
         //Put global with option to override
@@ -749,24 +770,44 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             {
                 var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().First<Setting>();
 
-                //if setting does not exist, add setting to DB
-                if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+                //replace current setting values with new values if applicable
+                if (setting.CustomerId != currentSetting.CustomerId)
                 {
-                    setting.SettingKey = key;
-                    setting.Level = GLOBAL;
-                    setting.CreatedTimeStamp = DateTime.UtcNow;
-                    settingRepository.Add(setting);
-                    var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    return createdResponse;
+                    currentSetting.CustomerId = setting.CustomerId;
                 }
 
-                //replace current setting values with new values
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                if (setting.DeviceId != currentSetting.DeviceId)
+                {
+                    currentSetting.DeviceId = setting.DeviceId;
+                }
+
+                if (setting.UserName != currentSetting.UserName)
+                {
+                    currentSetting.UserName = setting.UserName;
+                }
+
+                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+                {
+                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+                {
+                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSetting.LastModifiedById)
+                {
+                    currentSetting.LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSetting.Value)
+                {
+                    currentSetting.Value = setting.Value;
+                }
+
                 currentSetting.EndEffectiveDate = null;
                 currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-                currentSetting.Value = setting.Value;
 
                 //try updating setting
                 if (!settingRepository.Update(currentSetting))
@@ -782,21 +823,46 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     .Where(x => x.SettingKey == key &&
                     x.Level == GLOBAL || x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                /*//if settings were not found, create them?
-                if (listOfCurrentSettings.Count == 0)
-                {
-
-                }*/
-
                 //update values of setting objects in list
                 for (int i = 0; i < listOfCurrentSettings.Count(); i++)
                 {
-                    listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId)
+                    {
+                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
+                    }
+
+                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId)
+                    {
+                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
+                    }
+
+                    if (setting.UserName != listOfCurrentSettings[i].UserName)
+                    {
+                        listOfCurrentSettings[i].UserName = setting.UserName;
+                    }
+
+                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate)
+                    {
+                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    }
+
+                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy)
+                    {
+                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
+                    }
+
+                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById)
+                    {
+                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
+                    }
+
+                    if (setting.Value != listOfCurrentSettings[i].Value)
+                    {
+                        listOfCurrentSettings[i].Value = setting.Value;
+                    }
+
                     listOfCurrentSettings[i].EndEffectiveDate = null;
                     listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
-                    listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    listOfCurrentSettings[i].Value = setting.Value;
                 }
 
                 //update settings
@@ -815,7 +881,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put setting - Specific Entity (global)
-        //**
         [Route("settings/global/{entityId}/{key}/{overrideLower?}")]
         public HttpResponseMessage PutGlobalEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
         {
@@ -824,25 +889,45 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId 
                 && x.SettingKey == key && x.Level == GLOBAL).ToList().First<Setting>();
 
-                //if setting does not exist, add setting to DB
-                if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+                //replace current setting values with new setting values
+                if (setting.CustomerId != currentSetting.CustomerId)
                 {
-                    setting.Level = GLOBAL;
-                    setting.CustomerId = entityId;
-                    setting.CreatedTimeStamp = DateTime.UtcNow;
-                    setting.SettingKey = key;
-                    settingRepository.Add(setting);
-                    var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    return createdResponse;
+                    currentSetting.CustomerId = setting.CustomerId;
                 }
 
-                //replace current setting values with new setting values
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                if (setting.DeviceId != currentSetting.DeviceId)
+                {
+                    currentSetting.DeviceId = setting.DeviceId;
+                }
+
+                if (setting.UserName != currentSetting.UserName)
+                {
+                    currentSetting.UserName = setting.UserName;
+                }
+
+                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+                {
+                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+                {
+                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSetting.LastModifiedById)
+                {
+                    currentSetting.LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSetting.Value)
+                {
+                    currentSetting.Value = setting.Value;
+                }
+
                 currentSetting.EndEffectiveDate = null;
                 currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-                currentSetting.Value = setting.Value;
+
 
                 //update setting
                 if (!settingRepository.Update(currentSetting))
@@ -857,21 +942,46 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     .Where(x => x.SettingKey == key && x.CustomerId == entityId &&
                     x.Level == GLOBAL || x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                /*//if settings were not found, create them?
-                if (listOfCurrentSettings.Count == 0)
-                {
-
-                }*/
-
                 //update values of setting objects in list
                 for (int i = 0; i < listOfCurrentSettings.Count(); i++)
                 {
-                    listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId)
+                    {
+                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
+                    }
+
+                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId)
+                    {
+                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
+                    }
+
+                    if (setting.UserName != listOfCurrentSettings[i].UserName)
+                    {
+                        listOfCurrentSettings[i].UserName = setting.UserName;
+                    }
+
+                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate)
+                    {
+                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    }
+
+                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy)
+                    {
+                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
+                    }
+
+                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById)
+                    {
+                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
+                    }
+
+                    if (setting.Value != listOfCurrentSettings[i].Value)
+                    {
+                        listOfCurrentSettings[i].Value = setting.Value;
+                    }
+
                     listOfCurrentSettings[i].EndEffectiveDate = null;
                     listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
-                    listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    listOfCurrentSettings[i].Value = setting.Value;
                 }
 
                 //update settings
@@ -902,23 +1012,44 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             {
                 var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == CUSTOMER).ToList().First<Setting>();
 
-                //if setting does not exist, add setting to DB
-                if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+                //replace current setting values with new values if applicable
+                if (setting.CustomerId != currentSetting.CustomerId)
                 {
-                    setting.SettingKey = key;
-                    setting.Level = CUSTOMER;
-                    setting.CreatedTimeStamp = DateTime.UtcNow;
-                    settingRepository.Add(setting);
-                    var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    return createdResponse;
+                    currentSetting.CustomerId = setting.CustomerId;
                 }
 
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                if (setting.DeviceId != currentSetting.DeviceId)
+                {
+                    currentSetting.DeviceId = setting.DeviceId;
+                }
+
+                if (setting.UserName != currentSetting.UserName)
+                {
+                    currentSetting.UserName = setting.UserName;
+                }
+
+                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+                {
+                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+                {
+                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSetting.LastModifiedById)
+                {
+                    currentSetting.LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSetting.Value)
+                {
+                    currentSetting.Value = setting.Value;
+                }
+
                 currentSetting.EndEffectiveDate = null;
                 currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-                currentSetting.Value = setting.Value;
 
                 if (!settingRepository.Update(currentSetting))
                 {
@@ -933,21 +1064,46 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     .Where(x => x.SettingKey == key &&
                     x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                /*//if settings were not found, create them?
-                if (listOfCurrentSettings.Count == 0)
-                {
-
-                }*/
-
                 //update values of setting objects in list
                 for (int i = 0; i < listOfCurrentSettings.Count(); i++)
                 {
-                    listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId)
+                    {
+                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
+                    }
+
+                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId)
+                    {
+                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
+                    }
+
+                    if (setting.UserName != listOfCurrentSettings[i].UserName)
+                    {
+                        listOfCurrentSettings[i].UserName = setting.UserName;
+                    }
+
+                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate)
+                    {
+                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    }
+
+                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy)
+                    {
+                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
+                    }
+
+                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById)
+                    {
+                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
+                    }
+
+                    if (setting.Value != listOfCurrentSettings[i].Value)
+                    {
+                        listOfCurrentSettings[i].Value = setting.Value;
+                    }
+
                     listOfCurrentSettings[i].EndEffectiveDate = null;
                     listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
-                    listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    listOfCurrentSettings[i].Value = setting.Value;
                 }
 
                 //update settings
@@ -976,24 +1132,43 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId && x.SettingKey == key
                 && x.Level == CUSTOMER).First<Setting>();
 
-                //if setting does not exist, add setting to DB
-                if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+                if (setting.CustomerId != currentSetting.CustomerId)
                 {
-                    setting.DeviceId = entityId;
-                    setting.SettingKey = key;
-                    setting.Level = CUSTOMER;
-                    setting.CreatedTimeStamp = DateTime.UtcNow;
-                    settingRepository.Add(setting);
-                    var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    return createdResponse;
+                    currentSetting.CustomerId = setting.CustomerId;
                 }
 
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                if (setting.DeviceId != currentSetting.DeviceId)
+                {
+                    currentSetting.DeviceId = setting.DeviceId;
+                }
+
+                if (setting.UserName != currentSetting.UserName)
+                {
+                    currentSetting.UserName = setting.UserName;
+                }
+
+                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+                {
+                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+                {
+                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSetting.LastModifiedById)
+                {
+                    currentSetting.LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSetting.Value)
+                {
+                    currentSetting.Value = setting.Value;
+                }
+
                 currentSetting.EndEffectiveDate = null;
                 currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-                currentSetting.Value = setting.Value;
 
                 if (!settingRepository.Update(currentSetting))
                 {
@@ -1002,29 +1177,54 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
             else
             {
-                var currentSettingsList = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key
+                var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key
                 && x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                /*//if settings were not found, create them?
-                if (listOfCurrentSettings.Count == 0)
+                for (int i = 0; i < listOfCurrentSettings.Count; i++)
                 {
+                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId)
+                    {
+                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
+                    }
 
-                }*/
+                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId)
+                    {
+                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
+                    }
 
-                for (int i = 0; i < currentSettingsList.Count; i++)
-                {
-                    currentSettingsList[i].StartEffectiveDate = setting.StartEffectiveDate;
-                    currentSettingsList[i].EndEffectiveDate = null;
-                    currentSettingsList[i].LastModifiedTimeStamp = DateTime.UtcNow;
-                    currentSettingsList[i].LastModifiedBy = setting.LastModifiedBy;
-                    currentSettingsList[i].LastModifiedById = setting.LastModifiedById;
-                    currentSettingsList[i].Value = setting.Value;
+                    if (setting.UserName != listOfCurrentSettings[i].UserName)
+                    {
+                        listOfCurrentSettings[i].UserName = setting.UserName;
+                    }
+
+                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate)
+                    {
+                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    }
+
+                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy)
+                    {
+                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
+                    }
+
+                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById)
+                    {
+                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
+                    }
+
+                    if (setting.Value != listOfCurrentSettings[i].Value)
+                    {
+                        listOfCurrentSettings[i].Value = setting.Value;
+                    }
+
+                    listOfCurrentSettings[i].EndEffectiveDate = null;
+                    listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
                 }
 
                 //update settings
-                for (int j = 0; j < currentSettingsList.Count(); j++)
+                for (int j = 0; j < listOfCurrentSettings.Count(); j++)
                 {
-                    if (!settingRepository.Update(currentSettingsList[j]))
+                    if (!settingRepository.Update(listOfCurrentSettings[j]))
                     {
                         throw new HttpResponseException(HttpStatusCode.NotFound);
                     }
@@ -1047,24 +1247,43 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key
             && x.CustomerId == customerId && x.Level == DEVICE).First<Setting>();
 
-            //if setting does not exist, add setting to DB
-            if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+            if (setting.CustomerId != currentSetting.CustomerId)
             {
-                setting.CustomerId = customerId;
-                setting.Level = DEVICE;
-                setting.SettingKey = key;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-                settingRepository.Add(setting);
-                var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                return createdResponse;
+                currentSetting.CustomerId = setting.CustomerId;
             }
 
-            currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            if (setting.DeviceId != currentSetting.DeviceId)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
             currentSetting.EndEffectiveDate = null;
             currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-            currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            currentSetting.LastModifiedById = setting.LastModifiedById;
-            currentSetting.Value = setting.Value;
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1074,8 +1293,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, currentSetting);
             return updatedResponse;
-
-
         }
 
         //Put setting for device - Specific entity 
@@ -1085,25 +1302,43 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
             && x.UserName == entityId && x.SettingKey == key && x.Level == DEVICE).First<Setting>();
 
-            //if setting does not exist, add setting to DB
-            if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+            if (setting.CustomerId != currentSetting.CustomerId)
             {
-                setting.CustomerId = customerId;
-                setting.Level = DEVICE;
-                setting.UserName = entityId;
-                setting.SettingKey = key;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-                settingRepository.Add(setting);
-                var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                return createdResponse;
+                currentSetting.CustomerId = setting.CustomerId;
             }
 
-            currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            if (setting.DeviceId != currentSetting.DeviceId)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
             currentSetting.EndEffectiveDate = null;
             currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-            currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            currentSetting.LastModifiedById = setting.LastModifiedById;
-            currentSetting.Value = setting.Value;
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1128,24 +1363,43 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId 
             && x.SettingKey == key && x.Level == USER).First<Setting>();
 
-            //if setting does not exist, add setting to DB
-            if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+            if (setting.CustomerId != currentSetting.CustomerId)
             {
-                setting.CustomerId = customerId;
-                setting.Level = USER;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-                setting.SettingKey = key;
-                settingRepository.Add(setting);
-                var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                return createdResponse;
+                currentSetting.CustomerId = setting.CustomerId;
             }
 
-            currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            if (setting.DeviceId != currentSetting.DeviceId)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
             currentSetting.EndEffectiveDate = null;
             currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-            currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            currentSetting.LastModifiedById = setting.LastModifiedById;
-            currentSetting.Value = setting.Value;
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1164,24 +1418,43 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
             && x.UserName == entityId && x.SettingKey == key && x.Level == USER).First<Setting>();
 
-            //if setting does not exist, add setting to DB
-            if (currentSetting == null && !settingRepository.DoesSettingExist(setting))
+            if (setting.CustomerId != currentSetting.CustomerId)
             {
-                setting.UserName = entityId;
-                setting.CustomerId = customerId;
-                setting.Level = USER;
-                setting.SettingKey = key;
-                settingRepository.Add(setting);
-                var createdResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                return createdResponse;
+                currentSetting.CustomerId = setting.CustomerId;
             }
 
-            currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            if (setting.DeviceId != currentSetting.DeviceId)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
             currentSetting.EndEffectiveDate = null;
             currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-            currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            currentSetting.LastModifiedById = setting.LastModifiedById;
-            currentSetting.Value = setting.Value;
 
             if (!settingRepository.Update(currentSetting))
             {
