@@ -26,9 +26,9 @@ namespace DOOFUS.Models
 
         public virtual DateTime LastModifiedTimeStamp { get; set; }        
 
-        public virtual string LastModifiedBy { get; set; }
+        public virtual string LastModifiedBy { get; set; } 
 
-        public virtual int LastModifiedById { get; set; }
+        public virtual int? LastModifiedById { get; set; } //nullable
     }
 }
  

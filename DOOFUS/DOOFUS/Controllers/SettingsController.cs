@@ -98,21 +98,21 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //Post a setting (global) 
         //**
         [Route("settings/global/{key}")]
-        public HttpResponseMessage PostGlobalSetting(Setting setting)
+        public HttpResponseMessage PostGlobalSetting(Setting setting, string key)
         {
             setting.Level = GLOBAL;
+            setting.SettingKey = key;
             setting.LastModifiedBy = GLOBAL;
             setting.LastModifiedTimeStamp = DateTime.UtcNow;
             setting.CreatedTimeStamp = DateTime.UtcNow;
+            setting.StartEffectiveDate = DateTime.UtcNow;
 
             if (!settingRepository.DoesSettingExist(setting))
             {
                 setting = settingRepository.Add(setting);
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-
-                var uri = Url.Link("Global", new { id = setting.Id });
-               // response.Headers.Location = new Uri(uri);
+                var uri = Url.Link("Global", new { id = setting.Id });              
 
                 return response;
             }
@@ -121,7 +121,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 var uri = Url.Link("Global", new { id = setting.Id });
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.PreconditionFailed, setting);
                 response.Content = new StringContent(EXISTING_ENTRY);
-                //response.Headers.Location = new Uri(uri);
+                
 
                 return response;                
             }
@@ -129,23 +129,25 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a global setting with option to override lower levels
-        [Route("settings/global/{key}/{overrideLower?}")]
+        [Route("settings/global/{key}/{overrideLower:bool?}")]
         public HttpResponseMessage PostGlobalSettingOverride(Setting setting, string key, bool overrideLower = false)
         {
+            setting.Level = GLOBAL;
+            setting.SettingKey = key;
+            setting.LastModifiedBy = GLOBAL;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
+            setting.CreatedTimeStamp = DateTime.UtcNow;
+            setting.StartEffectiveDate = DateTime.UtcNow;
+
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
             {
-                setting.Level = GLOBAL;
-                setting.LastModifiedBy = GLOBAL;
-                setting.LastModifiedTimeStamp = DateTime.UtcNow;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-
                 //Get list of existing settings which match the incoming one, if any
                 var SettingList = settingRepository.GetAll()
                     .Where(c => c.SettingKey == setting.SettingKey).ToList();
 
                 if (SettingList.Count() < 1) //no existing setting found, just add new
                 {
-                    settingRepository.Add(setting);
+                    settingRepository.Add(setting);                    
                 }
 
                 if(overrideLower)  //existing setting(s) found, lets override them and add the new one
@@ -156,12 +158,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                         setting.Level = c.Level;
                         settingRepository.SaveOrUpdate(setting);
                     }
-                }               
+                }
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-
-                var uri = Url.Link("GlobalOverride", new { id = setting.Id });
-                response.Headers.Location = new Uri(uri);
+                var uri = Url.Link("Global", new { id = setting.Id });
 
                 return response;
             }
@@ -169,8 +169,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             {
                 var uri = Url.Link("Global", new { id = setting.Id });
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.PreconditionFailed, setting);
-                response.Content = new StringContent(EXISTING_ENTRY);
-                response.Headers.Location = new Uri(uri);
+                response.Content = new StringContent(EXISTING_ENTRY);                
 
                 return response;
             }
@@ -179,16 +178,18 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         
         //Post a setting (global) to multiple customers - with override
         //settings/global/{key}?customerids=1,2,50, etc
-        [Route("settings/global/{key}/{customerids}/{overrideLower?}")]
+        [Route("settings/global/{key}/{customerids}/{overrideLower:bool?}")]
         public HttpResponseMessage PostGlobalEntitySetting(Setting setting, string key, string customerids, bool overrideLower = false)
         {
+            setting.Level = GLOBAL;
+            setting.LastModifiedBy = GLOBAL;
+            setting.SettingKey = key;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
+            setting.CreatedTimeStamp = DateTime.UtcNow;
+            setting.StartEffectiveDate = DateTime.UtcNow;
+
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
             {
-                setting.Level = GLOBAL;
-                setting.LastModifiedBy = GLOBAL;
-                setting.LastModifiedTimeStamp = DateTime.UtcNow;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
-
                 //separate customer id string into individual ints
                 string[] separated = customerids.Split(',');
                 int parsed = 0;
@@ -248,15 +249,17 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a global setting - Specific customer id with option to override lower levels
-        [Route("settings/global/{customerid}/{key}/{overrideLower?}")]
+        [Route("settings/global/{customerid}/{key}/{overrideLower:bool?}")]
         public HttpResponseMessage PostGlobalEntitySettingOverride(Setting setting, int customerid, string key, bool overrideLower = false)
         {
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
             {
                 setting.Level = GLOBAL;
+                setting.SettingKey = key;
                 setting.LastModifiedBy = GLOBAL;
                 setting.LastModifiedTimeStamp = DateTime.UtcNow;
                 setting.CreatedTimeStamp = DateTime.UtcNow;
+                setting.StartEffectiveDate = DateTime.UtcNow;
 
                 //Get list of existing settings which match the incoming one, if any
                 var SettingList = settingRepository.GetAll()
@@ -354,15 +357,17 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         } */
 
         //Post a setting for each specified user at a specific customer and override each customer's lower levels
-       [Route("settings/customer/{customerid}/{key}/{usernames}/{overrideLower?}")]
+       [Route("settings/customer/{customerid}/{key}/{usernames}/{overrideLower:bool?}")]
         public HttpResponseMessage PostCustomerSettingOverride(Setting setting, int customerid, string key, string usernames, bool overrideLower = false)
         {
             //Customer level override
             setting.Level = CUSTOMER;
+            setting.SettingKey = key;
             setting.CustomerId = customerid;
             setting.LastModifiedById = customerid;
             setting.LastModifiedTimeStamp = DateTime.UtcNow;
             setting.CreatedTimeStamp = DateTime.UtcNow;
+            setting.StartEffectiveDate = DateTime.UtcNow;
 
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists. 
             {
@@ -423,9 +428,11 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //Customer level
             setting.Level = CUSTOMER;
             setting.CustomerId = customerid;
+            setting.SettingKey = key;
             setting.LastModifiedById = customerid;
             setting.LastModifiedTimeStamp = DateTime.UtcNow;
             setting.CreatedTimeStamp = DateTime.UtcNow;
+            setting.StartEffectiveDate = DateTime.UtcNow;
 
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
             {
@@ -450,16 +457,19 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Post a setting for specific customer and override lower levels
-        [Route("settings/customer/{customerid}/{key}/{overrideLower?}")]
+        [Route("settings/customer/{customerid}/{key}/{overrideLower:bool?}")]
         public HttpResponseMessage PostCustomerEntitySettingOverride(Setting setting, int customerid, string key, bool overrideLower = false)
-        {
+        {            
+            setting.Level = CUSTOMER;
+            setting.SettingKey = key;
+            setting.LastModifiedById = customerid;
+            setting.LastModifiedTimeStamp = DateTime.UtcNow;
+            setting.CreatedTimeStamp = DateTime.UtcNow;
+            setting.StartEffectiveDate = DateTime.UtcNow;
+
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
             {
-                //Customer level
-                setting.Level = CUSTOMER;
-                setting.LastModifiedById = customerid;
-                setting.LastModifiedTimeStamp = DateTime.UtcNow;
-                setting.CreatedTimeStamp = DateTime.UtcNow;
+                //Customer level                
 
                 //Override customer level
                 //Get all settings for this customer and this customer's lower levels which match this key
@@ -499,7 +509,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                         }
                     }
                 }
-
                 //override device level           
                 SettingList = settingRepository.GetAll()
                   .Where(c => c.SettingKey == key && c.CustomerId == customerid && c.Level == DEVICE).ToList();
@@ -550,7 +559,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 setting.Level = DEVICE;
                 setting.CustomerId = customerid;
                 setting.SettingKey = key;
+                setting.LastModifiedById = customerid;
+                setting.LastModifiedTimeStamp = DateTime.UtcNow;
                 setting.CreatedTimeStamp = DateTime.UtcNow;
+                setting.StartEffectiveDate = DateTime.UtcNow;
 
                 //separate device id string into individual strings
                 var separated = deviceids.Split(',');
