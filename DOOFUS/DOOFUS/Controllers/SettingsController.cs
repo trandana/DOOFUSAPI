@@ -617,9 +617,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Put global with option to override
-        //settings/global/{key}/{overrideLower?}?customerIds="1,4,7,etc."
         [Route("settings/global/{key}/{overrideLower?}")]
-        public HttpResponseMessage PutGlobalSettingOverride(string key, Setting setting, string customerIds, bool overrideLower = false)
+        public HttpResponseMessage PutGlobalSettingOverride(string key, Setting setting, bool overrideLower = false)
         {
             if (!overrideLower)
             {
@@ -859,7 +858,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Put setting (customer) with option to override lower
-        //add csv attribute
         [Route("settings/customer/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerSettingOverride(string key, Setting setting, bool overrideLower = false)
         {
@@ -977,8 +975,155 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
+        //Put setting (customer) with option to override lower
+        //Can update multiple customerIds
+        //settings/customer/{key}/{overrideLower?}?customerIds="123,234,345"
+        [Route("settings/customer/{key}/{overrideLower?}")]
+        public HttpResponseMessage PutCustomerSettingOverride(string key, Setting setting, string customerIds, bool overrideLower = false)
+        {
+            string[] separated = customerIds.Split(','); //hold seperated customer IDs
+            int[] cIds = new int[separated.Count()]; //place parsed ids in this array
+
+            for(int i = 0; i < separated.Count(); i++) //convert strings to ints and place in array
+            {
+                cIds[i] = Convert.ToInt32(separated[i]);
+            }
+
+            var currentSettings = new List<Setting>(); //new list to store settings
+
+            if (!overrideLower)
+            {
+                //add each setting  to array that is specific to the customer Ids entered
+                for(int j = 0; j < separated.Count(); j++)
+                {
+                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key 
+                    && x.Level == CUSTOMER && x.CustomerId == cIds[j]).ToList().First<Setting>());
+                }
+
+                for(int k = 0; k < currentSettings.Count(); k++)
+                {
+                    //replace current setting values with new values if applicable
+                    if (setting.CustomerId != currentSettings[k].CustomerId)
+                    {
+                        currentSettings[k].CustomerId = setting.CustomerId;
+                    }
+
+                    if (setting.DeviceId != currentSettings[k].DeviceId)
+                    {
+                        currentSettings[k].DeviceId = setting.DeviceId;
+                    }
+
+                    if (setting.UserName != currentSettings[k].UserName)
+                    {
+                        currentSettings[k].UserName = setting.UserName;
+                    }
+
+                    if (setting.StartEffectiveDate != currentSettings[k].StartEffectiveDate)
+                    {
+                        currentSettings[k].StartEffectiveDate = setting.StartEffectiveDate;
+                    }
+
+                    if (setting.LastModifiedBy != currentSettings[k].LastModifiedBy)
+                    {
+                        currentSettings[k].LastModifiedBy = setting.LastModifiedBy;
+                    }
+
+                    if (setting.LastModifiedById != currentSettings[k].LastModifiedById)
+                    {
+                        currentSettings[k].LastModifiedById = setting.LastModifiedById;
+                    }
+
+                    if (setting.Value != currentSettings[k].Value)
+                    {
+                        currentSettings[k].Value = setting.Value;
+                    }
+
+                    currentSettings[k].EndEffectiveDate = null;
+                    currentSettings[k].LastModifiedTimeStamp = DateTime.UtcNow;
+
+                    if (!settingRepository.Update(currentSettings[k]))
+                    {
+                        throw new HttpResponseException(HttpStatusCode.NotFound);
+                    }
+                }
+
+            }
+            else
+            {
+                //add lower level settings to currentSettings list
+                for (int j = 0; j < separated.Count(); j++)
+                {
+                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    x.Level == CUSTOMER && x.CustomerId == cIds[j]).ToList().First<Setting>());
+
+                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    x.Level == DEVICE && x.CustomerId == cIds[j]).ToList().First<Setting>());
+
+                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    x.Level == USER && x.CustomerId == cIds[j]).ToList().First<Setting>());
+                }
+
+                //update values of setting objects in list
+                for (int i = 0; i < currentSettings.Count(); i++)
+                {
+                    if (setting.CustomerId != currentSettings[i].CustomerId)
+                    {
+                        currentSettings[i].CustomerId = setting.CustomerId;
+                    }
+
+                    if (setting.DeviceId != currentSettings[i].DeviceId)
+                    {
+                        currentSettings[i].DeviceId = setting.DeviceId;
+                    }
+
+                    if (setting.UserName != currentSettings[i].UserName)
+                    {
+                        currentSettings[i].UserName = setting.UserName;
+                    }
+
+                    if (setting.StartEffectiveDate != currentSettings[i].StartEffectiveDate)
+                    {
+                        currentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
+                    }
+
+                    if (setting.LastModifiedBy != currentSettings[i].LastModifiedBy)
+                    {
+                        currentSettings[i].LastModifiedBy = setting.LastModifiedBy;
+                    }
+
+                    if (setting.LastModifiedById != currentSettings[i].LastModifiedById)
+                    {
+                        currentSettings[i].LastModifiedById = setting.LastModifiedById;
+                    }
+
+                    if (setting.Value != currentSettings[i].Value)
+                    {
+                        currentSettings[i].Value = setting.Value;
+                    }
+
+                    currentSettings[i].EndEffectiveDate = null;
+                    currentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
+                }
+
+                //update settings
+                for (int j = 0; j < currentSettings.Count(); j++)
+                {
+                    if (!settingRepository.Update(currentSettings[j]))
+                    {
+                        throw new HttpResponseException(HttpStatusCode.NotFound);
+                    }
+                }
+
+            }
+
+            //Create HTTP response
+            var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
+            return response;
+        }
+
+
+
         //Put setting - Specific Entity (customer) and override lower
-        //**
         [Route("settings/customer/{entityId}/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerEntitySettingOverride(int entityId, string key, Setting setting, bool overrideLower = false)
         {
@@ -1095,9 +1240,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Put setting for device with option to override lower levels
-        //settings/device/{customerId}/{key}?deviceIds = "111,234,678,etc."
         [Route("settings/device/{customerId}/{key}")]
-        public HttpResponseMessage PutDeviceSettingOverride(int customerId, string key, string deviceIds, Setting setting)
+        public HttpResponseMessage PutDeviceSettingOverride(int customerId, string key, Setting setting)
         {   
             var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key
             && x.CustomerId == customerId && x.Level == DEVICE).First<Setting>();
@@ -1147,6 +1291,78 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, currentSetting);
+            return updatedResponse;
+        }
+
+        //settings/device/{customerId}/{key}?deviceIds = "111,234,678,etc."
+        [Route("settings/device/{customerId}/{key}")]
+        public HttpResponseMessage PutDeviceSettingOverride(int customerId, string key, string deviceIds, Setting setting)
+        {
+            string[] separated = deviceIds.Split(','); //hold seperated customer IDs
+            int[] dIds = new int[separated.Count()]; //place parsed ids in this array
+
+            for (int i = 0; i < separated.Count(); i++) //convert strings to ints and place in array
+            {
+                dIds[i] = Convert.ToInt32(separated[i]);
+            }
+
+            var currentSettings = new List<Setting>(); //new list to store settings
+
+            for(int i = 0; i < dIds.Count(); i++) //place all settings to modify in a list
+            {
+                currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key
+                && x.Level == CUSTOMER && x.CustomerId == dIds[i]).ToList().First<Setting>());
+            }
+
+            for(int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
+            {
+                if (setting.CustomerId != currentSettings[j].CustomerId)
+                {
+                    currentSettings[j].CustomerId = setting.CustomerId;
+                }
+
+                if (setting.DeviceId != currentSettings[j].DeviceId)
+                {
+                    currentSettings[j].DeviceId = setting.DeviceId;
+                }
+
+                if (setting.UserName != currentSettings[j].UserName)
+                {
+                    currentSettings[j].UserName = setting.UserName;
+                }
+
+                if (setting.StartEffectiveDate != currentSettings[j].StartEffectiveDate)
+                {
+                    currentSettings[j].StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSettings[j].LastModifiedBy)
+                {
+                    currentSettings[j].LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSettings[j].LastModifiedById)
+                {
+                    currentSettings[j].LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSettings[j].Value)
+                {
+                    currentSettings[j].Value = setting.Value;
+                }
+
+                currentSettings[j].EndEffectiveDate = null;
+                currentSettings[j].LastModifiedTimeStamp = DateTime.UtcNow;
+
+                if (!settingRepository.Update(currentSettings[j]))
+                {
+                    throw new HttpResponseException(HttpStatusCode.NotFound);
+                }
+
+            }
+
+            //Create HTTP response
+            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
             return updatedResponse;
         }
 
@@ -1211,11 +1427,66 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         //Put setting for user 
+        [Route("settings/user/{customerId}/{key}")]
+        public HttpResponseMessage PutUserSetting(int customerId, string key, Setting setting)
+        {
+            var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId 
+            && x.SettingKey == key && x.Level == USER).First<Setting>();
+
+            if (setting.CustomerId != currentSetting.CustomerId)
+            {
+                currentSetting.CustomerId = setting.CustomerId;
+            }
+
+            if (setting.DeviceId != currentSetting.DeviceId)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
+            currentSetting.EndEffectiveDate = null;
+            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+
+            if (!settingRepository.Update(currentSetting))
+            {
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+
+            //Create HTTP response
+            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, currentSetting);
+            return updatedResponse;
+        }
+
+        //put setting for user
         //settings/user/{customerId}/{key}?usernames = "jody,victor,phum,alex"
         [Route("settings/user/{customerId}/{key}")]
         public HttpResponseMessage PutUserSetting(int customerId, string key, string usernames, Setting setting)
         {
-            var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId 
+            var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
             && x.SettingKey == key && x.Level == USER).First<Setting>();
 
             if (setting.CustomerId != currentSetting.CustomerId)
