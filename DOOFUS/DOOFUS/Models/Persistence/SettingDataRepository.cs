@@ -92,8 +92,8 @@ namespace DOOFUS.Models.Persistence
                 return session.Get<Setting>(id);
         }
 
-        //Check if setting already exists
-        public bool DoesSettingExist(Setting setting)
+        //Check if setting already exists on a specific level
+        public bool DoesSettingExistAtLevel(Setting setting)
         {
             using (var session = NHibernateHelper.OpenSession())
                 if (session.Query<Setting>()
@@ -105,6 +105,21 @@ namespace DOOFUS.Models.Persistence
                 {
                     return false;
                 }                
+        }
+
+        //Check if setting already exists anywhere
+        public bool DoesSettingExist(Setting setting)
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                if (session.Query<Setting>()
+                        .Where(c => c.SettingKey == setting.SettingKey).FirstOrDefault() != null)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
         }
 
         //Get a list of all user settings for a given username
