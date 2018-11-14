@@ -39,6 +39,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var response = new GetResponse();
             response.Level = CUSTOMER;
             response.Settings = settingRepository.GetCustomerSettings(customerId);
+
             return response;
         }
 
