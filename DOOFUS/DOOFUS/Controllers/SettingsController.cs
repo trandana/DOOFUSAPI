@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Web.Http;
 //using System.Web.Mvc;
 
@@ -38,7 +39,16 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             var response = new GetResponse();
             response.Level = CUSTOMER;
-            response.Settings = settingRepository.GetCustomerSettings(customerId);
+            IEnumerable<Setting> customer = settingRepository.GetCustomerSettings(customerId);
+
+            if(customer.Count() == 0)
+            {
+                response.Settings = customer;
+                return response;
+            }
+
+            IEnumerable<Setting> global = settingRepository.GetGlobalSetting();
+            response.Settings = overrideSetting(global, customer);
 
             return response;
         }
@@ -49,7 +59,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             var response = new GetResponse();
             response.Level = DEVICE;
-            response.Settings = settingRepository.GetDeviceSettings(customerId, deviceId);
+            IEnumerable<Setting> device = settingRepository.GetDeviceSettings(customerId, deviceId);
+
+            if (device.Count() == 0)
+            {
+                response.Settings = device;
+                return response;
+            }
+
+            IEnumerable<Setting> global = settingRepository.GetGlobalSetting();
+            IEnumerable<Setting> customer = settingRepository.GetCustomerSettings(customerId);
+
+            IEnumerable<Setting> overridedCustomer = overrideSetting(global, customer);
+            response.Settings = overrideSetting(overridedCustomer, device);
+
             return response;
         }
 
@@ -74,6 +97,23 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
             return setting;
+        }
+
+        public IEnumerable<Setting> overrideSetting(IEnumerable<Setting> settings, IEnumerable<Setting> overrideSettings)
+        {
+            foreach (var overrideSetting in overrideSettings)
+            {
+                if (settings.FirstOrDefault(setting => setting.SettingKey.Equals(overrideSetting.SettingKey)) == null)
+                {
+                    settings = settings.Concat(new[] { overrideSetting });
+                }
+                else
+                {
+                    settings = settings.Select(setting => setting.SettingKey == overrideSetting.SettingKey ? overrideSetting : setting).ToArray();
+                }
+            }
+
+            return settings;
         }
 
         /*
