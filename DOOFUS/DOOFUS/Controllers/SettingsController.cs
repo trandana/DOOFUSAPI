@@ -259,12 +259,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 //Override was not specified, don't override lower levels
                 else
                 {
+                    int x = 0;
                     foreach (var id in separated)
                     {
-                        Int32.TryParse(id, out int x);
-                        setting.CustomerId = x;                       
-                        
-                        settingRepository.Add(setting);                                               
+                        if(Int32.TryParse(id, out x))
+                        {
+                            setting.CustomerId = x;
+
+                            settingRepository.Add(setting);
+                        }                                                                   
                     }
                 }
 
@@ -1990,13 +1993,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //separate device id string into individual strings
             var separated = deviceids.Split(',');
-            
+
 
             //Post setting for each device
             //Convert device id's from CSV list to integers, one at a time and delete their corresponding entries
+            int dID = 0;
             foreach (var i in separated)
             {
-                Int32.TryParse(i, out int dID); 
+                Int32.TryParse(i, out dID); 
                 var SettingList = settingRepository.GetAll()
                     .Where(c => c.SettingKey == key && c.DeviceId == dID && c.CustomerId == customerid&&c.Level==DEVICE);
 
