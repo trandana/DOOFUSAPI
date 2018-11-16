@@ -556,7 +556,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //Post device settings for one or more specific device ids
         //settings/device/{customerid}/{key}?deviceids=1,2,50, etc
         [Route("settings/device/{customerid}/{key}/{deviceids}")]
-        public HttpResponseMessage PostDeviceSetting(Setting setting, int customerid, string key, string deviceids)
+        public HttpResponseMessage PostDeviceSetting(Setting setting, int customerid, string key, int deviceid)
         {
             setting.Level = DEVICE;
             setting.CustomerId = customerid;
@@ -567,18 +567,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             setting.StartEffectiveDate = DateTime.UtcNow;
 
             if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
-            {
-                //separate device id string into individual strings
-                var separated = deviceids.Split(',');
-                int parsedDeviceId;
-
-                //Post setting for each device
-                foreach (var c in separated)
-                {
-                    Int32.TryParse(c, out parsedDeviceId);
-                    setting.DeviceId = parsedDeviceId;
-                    settingRepository.Add(setting);
-                }
+            {                   
+               setting.DeviceId = deviceid;
+               settingRepository.Add(setting);                
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
                 var uri = Url.Link("DeviceOverride", new { id = setting.Id });                
