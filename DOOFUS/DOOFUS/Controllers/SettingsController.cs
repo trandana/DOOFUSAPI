@@ -607,7 +607,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //get setting to update by id
             var currentSetting = settingRepository.Get(id);
 
-            if(currentSetting == null)
+            if (currentSetting == null)
             {
                 var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
                 return notFoundResponse;
@@ -670,7 +670,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             if (!overrideLower)
             {
-                
                 var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
 
                 if (currentSetting == null)
@@ -791,7 +790,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return updatedResponse;
             }
 
-           
+
         }
 
         //Put setting - Specific Entity (global)
@@ -800,7 +799,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             if (!overrideLower) //if overrideLower is false, update specified setting with new setting values
             {
-                var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId 
+                var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId
                 && x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
 
                 if (currentSetting == null)
@@ -854,6 +853,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     throw new HttpResponseException(HttpStatusCode.BadRequest);
                 }
+
+                var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+                return updatedResponse;
             }
             else //if overrideLower is true, override lower levels
             {
@@ -862,7 +864,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     .Where(x => x.SettingKey == key && x.CustomerId == entityId &&
                     x.Level == GLOBAL || x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                if(listOfCurrentSettings.Count == 0)
+                if (listOfCurrentSettings.Count() == 0)
                 {
                     var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
                     return notFoundResponse;
@@ -918,10 +920,11 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                         throw new HttpResponseException(HttpStatusCode.BadRequest);
                     }
                 }
-            }
 
-            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-            return updatedResponse;
+                //Create HTTP response
+                var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
+                return updatedResponse;
+            }
 
         }
 
@@ -986,6 +989,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     throw new HttpResponseException(HttpStatusCode.NotFound);
                 }
+                var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+                return updatedResponse;
+
 
             }
             else
@@ -1009,7 +1015,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                         listOfCurrentSettings[i].CustomerId = setting.CustomerId;
                     }
 
-                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId && setting.DeviceId != null) 
+                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId && setting.DeviceId != null)
                     {
                         listOfCurrentSettings[i].DeviceId = setting.DeviceId;
                     }
@@ -1052,23 +1058,22 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     }
                 }
 
-            }
+                //Create HTTP response
+                var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
+                return updatedResponse;
 
-            //Create HTTP response
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-            return response;
+            }
         }
 
-        //Put setting (customer) with option to override lower
-        //Can update multiple customerIds
-        //settings/customer/{key}/{overrideLower?}?customerIds="123,234,345"
-        [Route("settings/customer/{key}/{overrideLower?}")]
-        public HttpResponseMessage PutCustomerSetting(string key, Setting setting, string customerIds, bool overrideLower = false)
+       /* //Put setting (customer) with option to override lower
+        //Can update multiple settings by customerIds (csv list of ids)
+        [Route("settings/customer/{key}/{customerIds}/{overrideLower?}")]
+        public HttpResponseMessage PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
         {
             string[] separated = customerIds.Split(','); //hold seperated customer IDs
             int[] cIds = new int[separated.Count()]; //place parsed ids in this array
 
-            for(int i = 0; i < separated.Count(); i++) //convert strings to ints and place in array
+            for (int i = 0; i < separated.Count(); i++) //convert strings to ints and place in array
             {
                 cIds[i] = Convert.ToInt32(separated[i]);
             }
@@ -1078,13 +1083,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             if (!overrideLower)
             {
                 //add each setting  to array that is specific to the customer Ids entered
-                for(int j = 0; j < separated.Count(); j++)
+                for (int j = 0; j < separated.Count(); j++)
                 {
-                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key 
+                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key
                     && x.Level == CUSTOMER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
                 }
 
-                if (currentSettings.Count() == 0)
+                if (currentSettings.Contains(null))
                 {
                     var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
                     return notFoundResponse;
@@ -1135,7 +1140,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     {
                         throw new HttpResponseException(HttpStatusCode.BadRequest);
                     }
+
                 }
+
 
             }
             else
@@ -1214,11 +1221,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //Create HTTP response
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-            return response;
-        }
-
-
+            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            return updatedResponse;
+        }*/
 
         //Put setting - Specific Entity (customer) and override lower
         [Route("settings/customer/{entityId}/{key}/{overrideLower?}")]
@@ -1277,6 +1282,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     throw new HttpResponseException(HttpStatusCode.BadRequest);
                 }
+                //Create HTTP response
+                var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
+                return updatedResponse;
             }
             else
             {
@@ -1338,20 +1346,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                         throw new HttpResponseException(HttpStatusCode.BadRequest);
                     }
                 }
-            }
 
-            var response = Request.CreateResponse<Setting>(HttpStatusCode.OK, setting);
-            return response;
-        }
+                var response = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
+                return response;
+            }
+        } 
 
         //
         //PUT Device Level      
         //
 
-        //Put setting for device with option to override lower levels
+        //Put setting for device
         [Route("settings/device/{customerId}/{key}")]
         public HttpResponseMessage PutDeviceSetting(int customerId, string key, Setting setting)
-        {   
+        {
             var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key
             && x.CustomerId == customerId && x.Level == DEVICE).FirstOrDefault<Setting>();
 
@@ -1409,9 +1417,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
-        //settings/device/{customerId}/{key}?deviceIds = "111,234,678,etc."
-        [Route("settings/device/{customerId}/{key}")]
-        public HttpResponseMessage PutDeviceSetting(int customerId, string key, string deviceIds, Setting setting)
+        //Put setting for multiple devices
+        [Route("settings/device/{customerId}/{key}/{deviceIds}")]
+        public HttpResponseMessage PutDeviceSettingMultiple(int customerId, string key, string deviceIds, Setting setting)
         {
             string[] separated = deviceIds.Split(','); //hold seperated customer IDs
             int[] dIds = new int[separated.Count()]; //place parsed ids in this array
@@ -1423,19 +1431,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             var currentSettings = new List<Setting>(); //new list to store settings
 
-            for(int i = 0; i < dIds.Count(); i++) //place all settings to modify in a list
+            for (int i = 0; i < dIds.Count(); i++) //place all settings to modify in a list
             {
-                currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key
-                && x.Level == CUSTOMER && x.CustomerId == dIds[i]).ToList().FirstOrDefault<Setting>());
+                var settingToAdd = settingRepository.GetAll().Where(x => x.SettingKey == key
+                && x.Level == DEVICE && x.DeviceId == dIds[i]).ToList().FirstOrDefault<Setting>();
+                currentSettings.Add(settingToAdd);
             }
 
-            if(currentSettings.Count() == 0)
+            if (currentSettings.Count() == 0)
             {
                 var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
                 return notFoundResponse;
             }
 
-            for(int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
+            for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
             {
                 if (setting.CustomerId != currentSettings[j].CustomerId && setting.CustomerId != null)
                 {
@@ -1471,7 +1480,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     currentSettings[j].Value = setting.Value;
                 }
-
+                
                 currentSettings[j].EndEffectiveDate = null;
                 currentSettings[j].LastModifiedTimeStamp = DateTime.UtcNow;
 
@@ -1483,16 +1492,16 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //Create HTTP response
-            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
+            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
             return updatedResponse;
         }
 
-        //Put setting for device - Specific entity 
+        //Put setting for device - Specific device
         [Route("settings/device/{customerId}/{entityId}/{key}")]
-        public HttpResponseMessage PutDeviceEntitySetting(int customerId, string entityId, string key, Setting setting, bool overrideLower = false)
+        public HttpResponseMessage PutDeviceEntitySetting(int customerId, int entityId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
-            && x.UserName == entityId && x.SettingKey == key && x.Level == DEVICE).FirstOrDefault<Setting>();
+            && x.DeviceId == entityId && x.SettingKey == key && x.Level == DEVICE).FirstOrDefault<Setting>();
 
             if (currentSetting == null)
             {
@@ -1557,68 +1566,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/user/{customerId}/{key}")]
         public HttpResponseMessage PutUserSetting(int customerId, string key, Setting setting)
         {
-            var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId 
-            && x.SettingKey == key && x.Level == USER).FirstOrDefault<Setting>();
-
-            if (currentSetting == null)
-            {
-                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                return notFoundResponse;
-            }
-
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-
-            if (!settingRepository.Update(currentSetting))
-            {
-                throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-
-            //Create HTTP response
-            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
-            return updatedResponse;
-        }
-
-        //put setting for user
-        //settings/user/{customerId}/{key}?usernames = "jody,victor,phum,alex"
-        [Route("settings/user/{customerId}/{key}")]
-        public HttpResponseMessage PutUserSetting(int customerId, string key, string usernames, Setting setting)
-        {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
             && x.SettingKey == key && x.Level == USER).FirstOrDefault<Setting>();
 
@@ -1676,7 +1623,80 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
-        //Put setting for user - Specific entity 
+        //put setting for multiple users (multiple usernames csv)
+        [Route("settings/user/{customerId}/{key}/{usernames}")]
+        public HttpResponseMessage PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
+        {
+            string[] separated = usernames.Split(','); //hold seperated usernames
+
+            var currentSettings = new List<Setting>(); //new list to store settings
+
+            for (int i = 0; i < separated.Count(); i++) //place all settings to modify in a list
+            {
+                var settingToAdd = settingRepository.GetAll().Where(x => x.SettingKey == key
+                && x.Level == USER && x.UserName == separated[i]).ToList().FirstOrDefault<Setting>();
+                currentSettings.Add(settingToAdd);
+            }
+
+            if (currentSettings.Count() == 0)
+            {
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                return notFoundResponse;
+            }
+
+            for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
+            {
+                if (setting.CustomerId != currentSettings[j].CustomerId && setting.CustomerId != null)
+                {
+                    currentSettings[j].CustomerId = setting.CustomerId;
+                }
+
+                if (setting.DeviceId != currentSettings[j].DeviceId && setting.DeviceId != null)
+                {
+                    currentSettings[j].DeviceId = setting.DeviceId;
+                }
+
+                if (setting.UserName != currentSettings[j].UserName && setting.UserName != null)
+                {
+                    currentSettings[j].UserName = setting.UserName;
+                }
+
+                if (setting.StartEffectiveDate != currentSettings[j].StartEffectiveDate && setting.StartEffectiveDate != null)
+                {
+                    currentSettings[j].StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSettings[j].LastModifiedBy && setting.LastModifiedBy != null)
+                {
+                    currentSettings[j].LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSettings[j].LastModifiedById && setting.LastModifiedById != null)
+                {
+                    currentSettings[j].LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSettings[j].Value && setting.Value != null)
+                {
+                    currentSettings[j].Value = setting.Value;
+                }
+
+                currentSettings[j].EndEffectiveDate = null;
+                currentSettings[j].LastModifiedTimeStamp = DateTime.UtcNow;
+
+                if (!settingRepository.Update(currentSettings[j]))
+                {
+                    throw new HttpResponseException(HttpStatusCode.NotFound);
+                }
+
+            }
+
+            //Create HTTP response
+            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            return updatedResponse;
+        } 
+
+        //Put setting for user - Specific entity (username)
         [Route("settings/user/{customerId}/{entityId}/{key}")]
         public HttpResponseMessage PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
         {

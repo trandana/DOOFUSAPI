@@ -112,7 +112,7 @@ namespace DOOFUS.Models.Persistence
         {
             using (var session = NHibernateHelper.OpenSession())
                 if (session.Query<Setting>()
-                        .Where(c => c.SettingKey == setting.SettingKey).FirstOrDefault() != null)
+                        .Where(c => c.SettingKey == setting.SettingKey && c.Value == setting.Value).FirstOrDefault() != null)
                 {
                     return true;
                 }
