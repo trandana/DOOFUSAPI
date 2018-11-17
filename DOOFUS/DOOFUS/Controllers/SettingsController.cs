@@ -137,43 +137,11 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //       
 
         //TESTED
-        //Post a setting (global) 
-        //**
-        [Route("settings/global/{key}")]
-        public HttpResponseMessage PostGlobalSetting(Setting setting, string key)
-        {
-            setting.Level = GLOBAL;
-            setting.SettingKey = key;
-            setting.LastModifiedBy = GLOBAL;
-            setting.LastModifiedTimeStamp = DateTime.UtcNow;
-            setting.CreatedTimeStamp = DateTime.UtcNow;
-            setting.StartEffectiveDate = DateTime.UtcNow;
-
-            if (!settingRepository.DoesSettingExist(setting))
-            {
-                setting = settingRepository.Add(setting);
-
-                var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                var uri = Url.Link("Global", new { id = setting.Id });              
-
-                return response;
-            }
-            else
-            {
-                var uri = Url.Link("Global", new { id = setting.Id });
-                var response = Request.CreateResponse<Setting>(HttpStatusCode.PreconditionFailed, setting);
-                response.Content = new StringContent(EXISTING_ENTRY);
-                
-
-                return response;                
-            }
-
-        }
-
+        //Post a setting (global)       
         //Non override tested and working. Override still needs testing
         //Post a global setting with option to override lower levels
         [Route("settings/global/{key}/{overrideLower:bool?}")]
-        public HttpResponseMessage PostGlobalSettingOverride(Setting setting, string key, bool overrideLower = false)
+        public HttpResponseMessage PostGlobalSetting(Setting setting, string key, bool overrideLower = false)
         {
             setting.Level = GLOBAL;
             setting.SettingKey = key;
@@ -400,7 +368,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //Post a setting for one or more users or devices (entityid) and optionally override lower levels
         //If device id's were sent, override lower does nothing since we are already at the lowest level
        [Route("settings/customer/{customerid}/{key}/{entityids}/{overrideLower:bool?}")]
-        public HttpResponseMessage PostCustomerSettingOverride(Setting setting, int customerid, string key, string entityids, bool overrideLower = false)
+        public HttpResponseMessage PostCustomerSetting(Setting setting, int customerid, string key, string entityids, bool overrideLower = false)
         {
             //Set setting parameters
             setting.Level = CUSTOMER;
