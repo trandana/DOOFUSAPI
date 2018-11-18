@@ -572,6 +572,52 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         // PUT
         //
 
+
+        //function that is used throughout PUT calls to update a setting object before 
+        //updating the database.
+        public Setting UpdateSetting(Setting current, Setting setting)
+        {
+            if (setting.CustomerId != current.CustomerId && setting.CustomerId != null)
+            {
+                current.CustomerId = setting.CustomerId;
+            }
+
+            if (setting.DeviceId != current.DeviceId && setting.DeviceId != null)
+            {
+                current.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != current.UserName && setting.UserName != null)
+            {
+                current.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != current.StartEffectiveDate && setting.StartEffectiveDate != null)
+            {
+                current.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != current.LastModifiedBy && setting.LastModifiedBy != null)
+            {
+                current.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != current.LastModifiedById && setting.LastModifiedById != null)
+            {
+                current.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != current.Value && setting.Value != null)
+            {
+                current.Value = setting.Value;
+            }
+
+            current.EndEffectiveDate = null;
+            current.LastModifiedTimeStamp = DateTime.UtcNow;
+
+            return current;
+        }
+
         //
         //PUT Global Level
         //
@@ -590,44 +636,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //replace current setting values with new setting values
-            //if a value is different in new setting object when compared to the current setting values, adjust accordingly
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             //update setting
             if (!settingRepository.Update(currentSetting))
@@ -643,7 +652,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{key}/{overrideLower?}")]
         public HttpResponseMessage PutGlobalSetting(string key, Setting setting, bool overrideLower = false)
         {
-
             var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
 
             if (currentSetting == null)
@@ -653,43 +661,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //replace current setting values with new values if applicable
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             //try updating setting
             if (!settingRepository.Update(currentSetting))
@@ -738,49 +710,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
 
             //replace current setting values with new values if applicable
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             if (!settingRepository.Update(currentSetting))
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
             }
-
 
             if (overrideLower)
             {
@@ -838,44 +773,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             for (int k = 0; k < currentSettings.Count(); k++)
             {
-                //replace current setting values with new values if applicable
-                if (setting.CustomerId != currentSettings[k].CustomerId && setting.CustomerId != null)
-                {
-                    currentSettings[k].CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSettings[k].DeviceId && setting.DeviceId != null)
-                {
-                    currentSettings[k].DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSettings[k].UserName && setting.UserName != null)
-                {
-                    currentSettings[k].UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSettings[k].StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSettings[k].StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSettings[k].LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSettings[k].LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSettings[k].LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSettings[k].LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSettings[k].Value && setting.Value != null)
-                {
-                    currentSettings[k].Value = setting.Value;
-                }
-
-                currentSettings[k].EndEffectiveDate = null;
-                currentSettings[k].LastModifiedTimeStamp = DateTime.UtcNow;
+                //replace current setting values with new setting values
+                currentSetting[k] = UpdateSetting(currentSettings[k], setting);
 
                 if (!settingRepository.Update(currentSettings[k]))
                 {
@@ -931,43 +830,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
 
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            //replace current setting values with new setting values
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1012,43 +876,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
 
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            //replace current setting values with new setting values
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1089,43 +918,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
             {
-                if (setting.CustomerId != currentSettings[j].CustomerId && setting.CustomerId != null)
-                {
-                    currentSettings[j].CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSettings[j].DeviceId && setting.DeviceId != null)
-                {
-                    currentSettings[j].DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSettings[j].UserName && setting.UserName != null)
-                {
-                    currentSettings[j].UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSettings[j].StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSettings[j].StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSettings[j].LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSettings[j].LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSettings[j].LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSettings[j].LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSettings[j].Value && setting.Value != null)
-                {
-                    currentSettings[j].Value = setting.Value;
-                }
-                
-                currentSettings[j].EndEffectiveDate = null;
-                currentSettings[j].LastModifiedTimeStamp = DateTime.UtcNow;
+                //replace current setting values with new setting values
+                currentSettings[j] = UpdateSetting(currentSetting[j], setting);
 
                 if (!settingRepository.Update(currentSettings[j]))
                 {
@@ -1152,43 +946,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
 
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            //replace current setting values with new setting values
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1218,43 +977,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
 
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            //replace current setting values with new setting values
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             if (!settingRepository.Update(currentSetting))
             {
@@ -1289,47 +1013,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
             {
-                if (setting.CustomerId != currentSettings[j].CustomerId && setting.CustomerId != null)
-                {
-                    currentSettings[j].CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSettings[j].DeviceId && setting.DeviceId != null)
-                {
-                    currentSettings[j].DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSettings[j].UserName && setting.UserName != null)
-                {
-                    currentSettings[j].UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSettings[j].StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSettings[j].StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSettings[j].LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSettings[j].LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSettings[j].LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSettings[j].LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSettings[j].Value && setting.Value != null)
-                {
-                    currentSettings[j].Value = setting.Value;
-                }
-
-                currentSettings[j].EndEffectiveDate = null;
-                currentSettings[j].LastModifiedTimeStamp = DateTime.UtcNow;
-
+                //replace current setting values with new setting values
+                currentSettings[j] = UpdateSetting(currentSettings[j], setting);
+                
                 if (!settingRepository.Update(currentSettings[j]))
                 {
-                    throw new HttpResponseException(HttpStatusCode.NotFound);
+                    var updateErrorResponse = Request.CreateResponse(HttpStatusCode.BadRequest, "Update error.");
+                    return updateErrorResponse;
                 }
 
             }
@@ -1352,43 +1042,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
 
-            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-            {
-                currentSetting.CustomerId = setting.CustomerId;
-            }
-
-            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-            {
-                currentSetting.DeviceId = setting.DeviceId;
-            }
-
-            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-            {
-                currentSetting.UserName = setting.UserName;
-            }
-
-            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-            {
-                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-            }
-
-            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-            {
-                currentSetting.LastModifiedBy = setting.LastModifiedBy;
-            }
-
-            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-            {
-                currentSetting.LastModifiedById = setting.LastModifiedById;
-            }
-
-            if (setting.Value != currentSetting.Value && setting.Value != null)
-            {
-                currentSetting.Value = setting.Value;
-            }
-
-            currentSetting.EndEffectiveDate = null;
-            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+            //replace current setting values with new setting values
+            currentSetting = UpdateSetting(currentSetting, setting);
 
             if (!settingRepository.Update(currentSetting))
             {
