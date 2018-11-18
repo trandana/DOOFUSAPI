@@ -618,8 +618,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             //update setting
             if (!settingRepository.Update(currentSetting))
             {
-                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                return notFoundResponse;
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
             }
 
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
@@ -630,264 +629,82 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/global/{key}/{overrideLower?}")]
         public HttpResponseMessage PutGlobalSetting(string key, Setting setting, bool overrideLower = false)
         {
-            if (!overrideLower)
+
+            var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
+
+            if (currentSetting == null)
             {
-                var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
-
-                if (currentSetting == null)
-                {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                    return notFoundResponse;
-                }
-
-                //replace current setting values with new values if applicable
-                if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-                {
-                    currentSetting.CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-                {
-                    currentSetting.DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-                {
-                    currentSetting.UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSetting.LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSetting.Value && setting.Value != null)
-                {
-                    currentSetting.Value = setting.Value;
-                }
-
-                currentSetting.EndEffectiveDate = null;
-                currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-
-                //try updating setting
-                if (!settingRepository.Update(currentSetting))
-                {
-                    throw new HttpResponseException(HttpStatusCode.BadRequest);
-                }
-
-                //Create HTTP response
-                var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
-                return updatedResponse;
-
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                return notFoundResponse;
             }
-            else
+
+            //replace current setting values with new values if applicable
+            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
             {
-                //get list of all settings with specified key
+                currentSetting.CustomerId = setting.CustomerId;
+            }
+
+            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value && setting.Value != null)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
+            currentSetting.EndEffectiveDate = null;
+            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+
+            //try updating setting
+            if (!settingRepository.Update(currentSetting))
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
+            }
+
+            if (overrideLower)
+            {
+                //get list of all lower level settings with specified key
                 var listOfCurrentSettings = settingRepository.GetAll()
                     .Where(x => x.SettingKey == key &&
-                    x.Level == GLOBAL || x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
+                    x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                //update values of setting objects in list
-                for (int i = 0; i < listOfCurrentSettings.Count(); i++)
+                if (listOfCurrentSettings.Count == 0)
                 {
-                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId && setting.CustomerId != null)
-                    {
-                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
-                    }
-
-                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId && setting.DeviceId != null)
-                    {
-                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
-                    }
-
-                    if (setting.UserName != listOfCurrentSettings[i].UserName && setting.UserName != null)
-                    {
-                        listOfCurrentSettings[i].UserName = setting.UserName;
-                    }
-
-                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate && setting.StartEffectiveDate != null)
-                    {
-                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
-                    }
-
-                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy && setting.LastModifiedBy != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    }
-
-                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById && setting.LastModifiedById != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    }
-
-                    if (setting.Value != listOfCurrentSettings[i].Value && setting.Value != null)
-                    {
-                        listOfCurrentSettings[i].Value = setting.Value;
-                    }
-
-                    listOfCurrentSettings[i].EndEffectiveDate = null;
-                    listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
-                }
-
-                //update settings
-                for (int j = 0; j < listOfCurrentSettings.Count(); j++)
-                {
-                    if (!settingRepository.Update(listOfCurrentSettings[j]))
-                    {
-                        throw new HttpResponseException(HttpStatusCode.NotFound);
-                    }
-                }
-                //Create HTTP response
-                var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
-                return updatedResponse;
-            }
-
-
-        }
-
-        //Put setting - Specific Entity (global)
-        [Route("settings/global/{entityId}/{key}/{overrideLower?}")]
-        public HttpResponseMessage PutGlobalEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
-        {
-            if (!overrideLower) //if overrideLower is false, update specified setting with new setting values
-            {
-                var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId
-                && x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
-
-                if (currentSetting == null)
-                {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
                     return notFoundResponse;
                 }
 
-                //replace current setting values with new setting values
-                if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-                {
-                    currentSetting.CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-                {
-                    currentSetting.DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-                {
-                    currentSetting.UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSetting.LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSetting.Value && setting.Value != null)
-                {
-                    currentSetting.Value = setting.Value;
-                }
-
-                currentSetting.EndEffectiveDate = null;
-                currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-
-
-                //update setting
-                if (!settingRepository.Update(currentSetting))
-                {
-                    throw new HttpResponseException(HttpStatusCode.BadRequest);
-                }
-
-                var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
-                return updatedResponse;
-            }
-            else //if overrideLower is true, override lower levels
-            {
-                //get list of all setting with specified key and all levels
-                var listOfCurrentSettings = settingRepository.GetAll()
-                    .Where(x => x.SettingKey == key && x.CustomerId == entityId &&
-                    x.Level == GLOBAL || x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
-
-                if (listOfCurrentSettings.Count() == 0)
-                {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                    return notFoundResponse;
-                }
-
-                //update values of setting objects in list
+                //Delete settings in list
                 for (int i = 0; i < listOfCurrentSettings.Count(); i++)
                 {
-                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId && setting.CustomerId != null)
-                    {
-                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
-                    }
-
-                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId && setting.DeviceId != null)
-                    {
-                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
-                    }
-
-                    if (setting.UserName != listOfCurrentSettings[i].UserName && setting.UserName != null)
-                    {
-                        listOfCurrentSettings[i].UserName = setting.UserName;
-                    }
-
-                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate && setting.StartEffectiveDate != null)
-                    {
-                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
-                    }
-
-                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy && setting.LastModifiedBy != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    }
-
-                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById && setting.LastModifiedById != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    }
-
-                    if (setting.Value != listOfCurrentSettings[i].Value && setting.Value != null)
-                    {
-                        listOfCurrentSettings[i].Value = setting.Value;
-                    }
-
-                    listOfCurrentSettings[i].EndEffectiveDate = null;
-                    listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
+                    settingRepository.Delete(listOfCurrentSettings[i].Id);
                 }
-
-                //update settings
-                for (int j = 0; j < listOfCurrentSettings.Count(); j++)
-                {
-                    if (!settingRepository.Update(listOfCurrentSettings[j]))
-                    {
-                        throw new HttpResponseException(HttpStatusCode.BadRequest);
-                    }
-                }
-
-                //Create HTTP response
-                var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
-                return updatedResponse;
             }
-
+            //Create HTTP response
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK);
+            return updatedResponse;
         }
 
         //
@@ -898,136 +715,85 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         [Route("settings/customer/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerSetting(string key, Setting setting, bool overrideLower = false)
         {
-            if (!overrideLower)
+            var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == CUSTOMER).ToList().FirstOrDefault<Setting>();
+
+            if (currentSetting == null)
             {
-                var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == CUSTOMER).ToList().FirstOrDefault<Setting>();
-
-                if (currentSetting == null)
-                {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                    return notFoundResponse;
-                }
-
-                //replace current setting values with new values if applicable
-                if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-                {
-                    currentSetting.CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-                {
-                    currentSetting.DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-                {
-                    currentSetting.UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSetting.LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSetting.Value && setting.Value != null)
-                {
-                    currentSetting.Value = setting.Value;
-                }
-
-                currentSetting.EndEffectiveDate = null;
-                currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-
-                if (!settingRepository.Update(currentSetting))
-                {
-                    throw new HttpResponseException(HttpStatusCode.NotFound);
-                }
-                var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
-                return updatedResponse;
-
-
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                return notFoundResponse;
             }
-            else
+
+            //replace current setting values with new values if applicable
+            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
+            {
+                currentSetting.CustomerId = setting.CustomerId;
+            }
+
+            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value && setting.Value != null)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
+            currentSetting.EndEffectiveDate = null;
+            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+
+            if (!settingRepository.Update(currentSetting))
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
+            }
+
+
+            if (overrideLower)
             {
                 //get list of all setting with specified key
                 var listOfCurrentSettings = settingRepository.GetAll()
                     .Where(x => x.SettingKey == key &&
-                    x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
+                    x.Level == DEVICE || x.Level == USER).ToList();
 
                 if (listOfCurrentSettings.Count == 0)
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
                     return notFoundResponse;
                 }
 
-                //update values of setting objects in list
+                //Delete settings in list
                 for (int i = 0; i < listOfCurrentSettings.Count(); i++)
                 {
-                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId && setting.CustomerId != null)
-                    {
-                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
-                    }
-
-                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId && setting.DeviceId != null)
-                    {
-                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
-                    }
-
-                    if (setting.UserName != listOfCurrentSettings[i].UserName && setting.UserName != null)
-                    {
-                        listOfCurrentSettings[i].UserName = setting.UserName;
-                    }
-
-                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate && setting.StartEffectiveDate != null)
-                    {
-                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
-                    }
-
-                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy && setting.LastModifiedBy != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    }
-
-                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById && setting.LastModifiedById != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    }
-
-                    if (setting.Value != listOfCurrentSettings[i].Value && setting.Value != null)
-                    {
-                        listOfCurrentSettings[i].Value = setting.Value;
-                    }
-
-                    listOfCurrentSettings[i].EndEffectiveDate = null;
-                    listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
+                    settingRepository.Delete(listOfCurrentSettings[i].Id);
                 }
-
-                //update settings
-                for (int j = 0; j < listOfCurrentSettings.Count(); j++)
-                {
-                    if (!settingRepository.Update(listOfCurrentSettings[j]))
-                    {
-                        throw new HttpResponseException(HttpStatusCode.BadRequest);
-                    }
-                }
-
-                //Create HTTP response
-                var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
-                return updatedResponse;
-
             }
+
+            //Create HTTP response
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK);
+            return updatedResponse;
         }
 
-       /* //Put setting (customer) with option to override lower
+        //Put setting (customer) with option to override lower
         //Can update multiple settings by customerIds (csv list of ids)
         [Route("settings/customer/{key}/{customerIds}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
@@ -1042,216 +808,162 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             var currentSettings = new List<Setting>(); //new list to store settings
 
-            if (!overrideLower)
+
+            //add each setting  to array that is specific to the customer Ids entered
+            for (int j = 0; j < separated.Count(); j++)
             {
-                //add each setting  to array that is specific to the customer Ids entered
-                for (int j = 0; j < separated.Count(); j++)
+                currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key
+                && x.Level == CUSTOMER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
+            }
+
+            if (currentSettings.Contains(null))
+            {
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                return notFoundResponse;
+            }
+
+            for (int k = 0; k < currentSettings.Count(); k++)
+            {
+                //replace current setting values with new values if applicable
+                if (setting.CustomerId != currentSettings[k].CustomerId && setting.CustomerId != null)
                 {
-                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key
-                    && x.Level == CUSTOMER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
+                    currentSettings[k].CustomerId = setting.CustomerId;
                 }
 
-                if (currentSettings.Contains(null))
+                if (setting.DeviceId != currentSettings[k].DeviceId && setting.DeviceId != null)
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                    return notFoundResponse;
+                    currentSettings[k].DeviceId = setting.DeviceId;
                 }
 
-                for (int k = 0; k < currentSettings.Count(); k++)
+                if (setting.UserName != currentSettings[k].UserName && setting.UserName != null)
                 {
-                    //replace current setting values with new values if applicable
-                    if (setting.CustomerId != currentSettings[k].CustomerId && setting.CustomerId != null)
-                    {
-                        currentSettings[k].CustomerId = setting.CustomerId;
-                    }
-
-                    if (setting.DeviceId != currentSettings[k].DeviceId && setting.DeviceId != null)
-                    {
-                        currentSettings[k].DeviceId = setting.DeviceId;
-                    }
-
-                    if (setting.UserName != currentSettings[k].UserName && setting.UserName != null)
-                    {
-                        currentSettings[k].UserName = setting.UserName;
-                    }
-
-                    if (setting.StartEffectiveDate != currentSettings[k].StartEffectiveDate && setting.StartEffectiveDate != null)
-                    {
-                        currentSettings[k].StartEffectiveDate = setting.StartEffectiveDate;
-                    }
-
-                    if (setting.LastModifiedBy != currentSettings[k].LastModifiedBy && setting.LastModifiedBy != null)
-                    {
-                        currentSettings[k].LastModifiedBy = setting.LastModifiedBy;
-                    }
-
-                    if (setting.LastModifiedById != currentSettings[k].LastModifiedById && setting.LastModifiedById != null)
-                    {
-                        currentSettings[k].LastModifiedById = setting.LastModifiedById;
-                    }
-
-                    if (setting.Value != currentSettings[k].Value && setting.Value != null)
-                    {
-                        currentSettings[k].Value = setting.Value;
-                    }
-
-                    currentSettings[k].EndEffectiveDate = null;
-                    currentSettings[k].LastModifiedTimeStamp = DateTime.UtcNow;
-
-                    if (!settingRepository.Update(currentSettings[k]))
-                    {
-                        throw new HttpResponseException(HttpStatusCode.BadRequest);
-                    }
-
+                    currentSettings[k].UserName = setting.UserName;
                 }
 
+                if (setting.StartEffectiveDate != currentSettings[k].StartEffectiveDate && setting.StartEffectiveDate != null)
+                {
+                    currentSettings[k].StartEffectiveDate = setting.StartEffectiveDate;
+                }
+
+                if (setting.LastModifiedBy != currentSettings[k].LastModifiedBy && setting.LastModifiedBy != null)
+                {
+                    currentSettings[k].LastModifiedBy = setting.LastModifiedBy;
+                }
+
+                if (setting.LastModifiedById != currentSettings[k].LastModifiedById && setting.LastModifiedById != null)
+                {
+                    currentSettings[k].LastModifiedById = setting.LastModifiedById;
+                }
+
+                if (setting.Value != currentSettings[k].Value && setting.Value != null)
+                {
+                    currentSettings[k].Value = setting.Value;
+                }
+
+                currentSettings[k].EndEffectiveDate = null;
+                currentSettings[k].LastModifiedTimeStamp = DateTime.UtcNow;
+
+                if (!settingRepository.Update(currentSettings[k]))
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
+                }
 
             }
-            else
+
+            if (overrideLower)
             {
+                var currentSettingsToOverride = new List<Setting>(); //new list to store settings
+
                 //add lower level settings to currentSettings list
                 for (int j = 0; j < separated.Count(); j++)
                 {
-                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
-                    x.Level == CUSTOMER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
-
-                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    currentSettingsToOverride.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
                     x.Level == DEVICE && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
 
-                    currentSettings.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    currentSettingsToOverride.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
                     x.Level == USER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
                 }
 
 
-                if (currentSettings.Count() == 0)
+                if (currentSettings.Contains(null))
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
                     return notFoundResponse;
                 }
 
-                //update values of setting objects in list
-                for (int k = 0; k < currentSettings.Count(); k++)
+                //delete setting objects in list from db
+                for (int k = 0; k < currentSettingsToOverride.Count(); k++)
                 {
-                    if (setting.CustomerId != currentSettings[k].CustomerId && setting.CustomerId != null)
-                    {
-                        currentSettings[k].CustomerId = setting.CustomerId;
-                    }
-
-                    if (setting.DeviceId != currentSettings[k].DeviceId && setting.DeviceId != null)
-                    {
-                        currentSettings[k].DeviceId = setting.DeviceId;
-                    }
-
-                    if (setting.UserName != currentSettings[k].UserName && setting.UserName != null)
-                    {
-                        currentSettings[k].UserName = setting.UserName;
-                    }
-
-                    if (setting.StartEffectiveDate != currentSettings[k].StartEffectiveDate && setting.StartEffectiveDate != null)
-                    {
-                        currentSettings[k].StartEffectiveDate = setting.StartEffectiveDate;
-                    }
-
-                    if (setting.LastModifiedBy != currentSettings[k].LastModifiedBy && setting.LastModifiedBy != null)
-                    {
-                        currentSettings[k].LastModifiedBy = setting.LastModifiedBy;
-                    }
-
-                    if (setting.LastModifiedById != currentSettings[k].LastModifiedById && setting.LastModifiedById != null)
-                    {
-                        currentSettings[k].LastModifiedById = setting.LastModifiedById;
-                    }
-
-                    if (setting.Value != currentSettings[k].Value && setting.Value != null)
-                    {
-                        currentSettings[k].Value = setting.Value;
-                    }
-
-                    currentSettings[k].EndEffectiveDate = null;
-                    currentSettings[k].LastModifiedTimeStamp = DateTime.UtcNow;
-                }
-
-                //update settings
-                for (int j = 0; j < currentSettings.Count(); j++)
-                {
-                    if (!settingRepository.Update(currentSettings[j]))
-                    {
-                        throw new HttpResponseException(HttpStatusCode.NotFound);
-                    }
+                    settingRepository.Delete(currentSettingsToOverride[k].Id);
                 }
 
             }
 
             //Create HTTP response
-            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK);
             return updatedResponse;
-        }*/
+        }
 
         //Put setting - Specific Entity (customer) and override lower
         [Route("settings/customer/{entityId}/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
         {
-            if (!overrideLower)
+            var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId && x.SettingKey == key
+            && x.Level == CUSTOMER).FirstOrDefault<Setting>();
+
+            if (currentSetting == null)
             {
-                var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId && x.SettingKey == key
-                && x.Level == CUSTOMER).FirstOrDefault<Setting>();
-
-                if (currentSetting == null)
-                {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                    return notFoundResponse;
-                }
-
-                if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
-                {
-                    currentSetting.CustomerId = setting.CustomerId;
-                }
-
-                if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
-                {
-                    currentSetting.DeviceId = setting.DeviceId;
-                }
-
-                if (setting.UserName != currentSetting.UserName && setting.UserName != null)
-                {
-                    currentSetting.UserName = setting.UserName;
-                }
-
-                if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
-                {
-                    currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
-                }
-
-                if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
-                {
-                    currentSetting.LastModifiedBy = setting.LastModifiedBy;
-                }
-
-                if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
-                {
-                    currentSetting.LastModifiedById = setting.LastModifiedById;
-                }
-
-                if (setting.Value != currentSetting.Value && setting.Value != null)
-                {
-                    currentSetting.Value = setting.Value;
-                }
-
-                currentSetting.EndEffectiveDate = null;
-                currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
-
-                if (!settingRepository.Update(currentSetting))
-                {
-                    throw new HttpResponseException(HttpStatusCode.BadRequest);
-                }
-                //Create HTTP response
-                var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
-                return updatedResponse;
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                return notFoundResponse;
             }
-            else
+
+            if (setting.CustomerId != currentSetting.CustomerId && setting.CustomerId != null)
+            {
+                currentSetting.CustomerId = setting.CustomerId;
+            }
+
+            if (setting.DeviceId != currentSetting.DeviceId && setting.DeviceId != null)
+            {
+                currentSetting.DeviceId = setting.DeviceId;
+            }
+
+            if (setting.UserName != currentSetting.UserName && setting.UserName != null)
+            {
+                currentSetting.UserName = setting.UserName;
+            }
+
+            if (setting.StartEffectiveDate != currentSetting.StartEffectiveDate && setting.StartEffectiveDate != null)
+            {
+                currentSetting.StartEffectiveDate = setting.StartEffectiveDate;
+            }
+
+            if (setting.LastModifiedBy != currentSetting.LastModifiedBy && setting.LastModifiedBy != null)
+            {
+                currentSetting.LastModifiedBy = setting.LastModifiedBy;
+            }
+
+            if (setting.LastModifiedById != currentSetting.LastModifiedById && setting.LastModifiedById != null)
+            {
+                currentSetting.LastModifiedById = setting.LastModifiedById;
+            }
+
+            if (setting.Value != currentSetting.Value && setting.Value != null)
+            {
+                currentSetting.Value = setting.Value;
+            }
+
+            currentSetting.EndEffectiveDate = null;
+            currentSetting.LastModifiedTimeStamp = DateTime.UtcNow;
+
+            if (!settingRepository.Update(currentSetting))
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
+            }
+
+            if (overrideLower)
             {
                 var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key
-                && x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
+                && x.Level == DEVICE || x.Level == USER).ToList();
 
                 if (listOfCurrentSettings.Count() == 0)
                 {
@@ -1261,58 +973,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 for (int i = 0; i < listOfCurrentSettings.Count; i++)
                 {
-                    if (setting.CustomerId != listOfCurrentSettings[i].CustomerId && setting.CustomerId != null)
-                    {
-                        listOfCurrentSettings[i].CustomerId = setting.CustomerId;
-                    }
-
-                    if (setting.DeviceId != listOfCurrentSettings[i].DeviceId && setting.DeviceId != null)
-                    {
-                        listOfCurrentSettings[i].DeviceId = setting.DeviceId;
-                    }
-
-                    if (setting.UserName != listOfCurrentSettings[i].UserName && setting.UserName != null)
-                    {
-                        listOfCurrentSettings[i].UserName = setting.UserName;
-                    }
-
-                    if (setting.StartEffectiveDate != listOfCurrentSettings[i].StartEffectiveDate && setting.StartEffectiveDate != null)
-                    {
-                        listOfCurrentSettings[i].StartEffectiveDate = setting.StartEffectiveDate;
-                    }
-
-                    if (setting.LastModifiedBy != listOfCurrentSettings[i].LastModifiedBy && setting.LastModifiedBy != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedBy = setting.LastModifiedBy;
-                    }
-
-                    if (setting.LastModifiedById != listOfCurrentSettings[i].LastModifiedById && setting.LastModifiedById != null)
-                    {
-                        listOfCurrentSettings[i].LastModifiedById = setting.LastModifiedById;
-                    }
-
-                    if (setting.Value != listOfCurrentSettings[i].Value && setting.Value != null)
-                    {
-                        listOfCurrentSettings[i].Value = setting.Value;
-                    }
-
-                    listOfCurrentSettings[i].EndEffectiveDate = null;
-                    listOfCurrentSettings[i].LastModifiedTimeStamp = DateTime.UtcNow;
+                    settingRepository.Delete(listOfCurrentSettings[i].Id);
                 }
 
-                //update settings
-                for (int j = 0; j < listOfCurrentSettings.Count(); j++)
-                {
-                    if (!settingRepository.Update(listOfCurrentSettings[j]))
-                    {
-                        throw new HttpResponseException(HttpStatusCode.BadRequest);
-                    }
-                }
-
-                var response = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, listOfCurrentSettings);
-                return response;
             }
-        } 
+            var response = Request.CreateResponse(HttpStatusCode.OK);
+            return response;
+        }
 
         //
         //PUT Device Level      
