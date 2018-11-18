@@ -127,7 +127,7 @@ namespace DOOFUS.Models.Persistence
         {
             using (var session = NHibernateHelper.OpenSession())
                 return session.Query<Setting>()
-                    .Where(c => c.CustomerId == CustomerId && c.UserName == UserName && c.Level == DEVICE).ToList();
+                    .Where(c => c.CustomerId == CustomerId && c.UserName == UserName && c.Level == USER).ToList();
         }
 
         

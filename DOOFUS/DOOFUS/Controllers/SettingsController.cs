@@ -82,7 +82,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             var response = new GetResponse();
             response.Level = USER;
-            response.Settings = settingRepository.GetUserSettings(customerId, userName);
+            IEnumerable<Setting> user = settingRepository.GetUserSettings(customerId, userName);
+
+            if (user.Count() == 0)
+            {
+                response.Settings = user;
+                return response;
+            }
+
+            IEnumerable<Setting> global = settingRepository.GetGlobalSetting();
+            IEnumerable<Setting> customer = settingRepository.GetCustomerSettings(customerId);
+
+            IEnumerable<Setting> overridedCustomer = overrideSetting(global, customer);
+            response.Settings = overrideSetting(overridedCustomer, user);
+
             return response;
         }
 
@@ -468,6 +481,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         public HttpResponseMessage PostUserEntitySetting(Setting setting, int customerid, string username, string key, bool overrideLower = false)
         {
             setting.Level = USER;
+            setting.CustomerId = customerid;
             setting.SettingKey = key;
             setting.UserName = username;
             setting.LastModifiedBy = username;
