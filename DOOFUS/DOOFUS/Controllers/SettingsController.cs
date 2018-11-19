@@ -774,7 +774,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             for (int k = 0; k < currentSettings.Count(); k++)
             {
                 //replace current setting values with new setting values
-                currentSetting[k] = UpdateSetting(currentSettings[k], setting);
+                currentSettings[k] = UpdateSetting(currentSettings[k], setting);
 
                 if (!settingRepository.Update(currentSettings[k]))
                 {
@@ -919,7 +919,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
             {
                 //replace current setting values with new setting values
-                currentSettings[j] = UpdateSetting(currentSetting[j], setting);
+                currentSettings[j] = UpdateSetting(currentSettings[j], setting);
 
                 if (!settingRepository.Update(currentSettings[j]))
                 {
