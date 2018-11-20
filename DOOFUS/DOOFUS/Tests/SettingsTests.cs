@@ -104,7 +104,13 @@ namespace DOOFUS.Tests
         [Test]
         public void TestDeletes()
         {
-
+            var response =
+                mockSettingsController.Object.PostGlobalSetting(mockSetting.Object, mockSetting.Object.SettingKey,
+                    false);
+            testType = "DeleteGlobalSetting";
+            if (response.StatusCode!=HttpStatusCode.Created)
+            {
+            }
         }         
 
         //Check if strings are equal
