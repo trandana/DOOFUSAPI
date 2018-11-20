@@ -35,7 +35,7 @@ namespace DOOFUS.Helper
         private static ISessionFactory CreateSessionFactory()
         {
             return Fluently.Configure().Database(MsSqlConfiguration.MsSql2008.ConnectionString(c => c.FromConnectionStringWithKey("DOOFUSDatabase"))).Mappings(m => m.FluentMappings.AddFromAssemblyOf<Setting>())
-                .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(true, true)).BuildSessionFactory();           
+                .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(false, false)).BuildSessionFactory();           
         }        
     }
 }

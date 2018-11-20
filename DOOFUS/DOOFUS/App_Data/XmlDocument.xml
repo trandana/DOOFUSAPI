@@ -485,10 +485,55 @@
             <summary>
             To delete a single or mutiple settings at gloabal level. with options to override lower level
             </summary>
-            <param name="keys">EX</param>
-            <param name="overrideLower">default: false</param>
+            <param name="keys">Example:key1,key2</param>
+            <param name="overrideLower">example:true</param>
             <returns>return 200 if pass, 400 if empty keys, 404 if no setting was found</returns>
-            <example><code>http://localhost:54850/settings/key1,key2/name1.name2/true</code></example>
+            
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteCustomerEntitySettingOverride(System.String,System.String,System.Boolean)">
+            <summary>
+            Delete a setting at customer level for list of ids and keys and override all lower levels also if true
+            </summary>
+            <param name="entityIds">CustomerIds: 1,2,3</param>
+            <param name="keys">Keys: key1,key2</param>
+            <param name="overrideLower">example: true</param>
+            <returns>return 200 if all good, 400 if customer or key is empty</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteCustomerSettingDevices(System.String,System.Int32,System.String)">
+            <summary>
+            Delete settings at customer level and override a list of device level settings
+            </summary>
+            <param name="key">keys to override: key1,key2</param>
+            <param name="customerid">customerids: 1</param>
+            <param name="deviceids">deviceids to override: 1,2</param>
+            <returns>return 200 if all good, 404 if no corresponding setting was found </returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteCustomerSettingCustomers(System.Int32,System.String,System.String)">
+            <summary>
+            Delete a setting at customer level override a list of device level settings
+            </summary>
+            <param name="customerid">customerId: 1</param>
+            <param name="key">key for that setting: key</param>
+            <param name="userids">userIds to override: 1</param>
+            <returns>return 200 if all good, 400 if corresponding setting do not exist</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteDeviceSetting(System.Int32,System.String,System.String)">
+            <summary>
+            delete settings at device level
+            </summary>
+            <param name="customerid">customerId to delete: 1</param>
+            <param name="deviceids">deviceIds to delete: 1,2,3</param>
+            <param name="key">key to delete</param>
+            <returns>return 200 if all is good, 400 if a deviceId can not be found</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteUserSetting(System.Int32,System.String,System.String)">
+            <summary>
+            delete settings at user level
+            </summary>
+            <param name="CustomerId">customerId to delete: 1</param>
+            <param name="key">key to delete: key </param>
+            <param name="usernames">usernames to delete: jody,alex</param>
+            <returns>returns 200 if all is good, 400 if a username can not be founds</returns>
         </member>
     </members>
 </doc>
