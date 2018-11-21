@@ -506,7 +506,7 @@
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutCustomerSettingMultiple(System.String,DOOFUS.Models.Setting,System.String,System.Boolean)">
             <summary>
-            Update multiple customer setting by setting key with option to override lower settings.
+            Update multiple customer settings by setting key with option to override lower settings.
             </summary>
             <param name="key"></param>
             <param name="customerIds"></param>
@@ -532,7 +532,7 @@
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutDeviceSettingMultiple(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
             <summary>
-            Update multiple device setting by customer ID and setting key.
+            Update multiple device settings by customer ID and setting key.
             </summary>
             <param name="customerId"></param>
             <param name="key"></param>
@@ -567,7 +567,7 @@
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserSettingMultiple(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
             <summary>
-            Update setting at user level for multiple users by customer ID and setting key.
+            Update settings at user level for multiple users by customer ID and setting key.
             </summary>
             <param name="customerId"></param>
             <param name="key"></param>

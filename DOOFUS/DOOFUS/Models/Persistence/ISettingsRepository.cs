@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DOOFUS.Models.Persistence
 {
-    interface ISettingsRepository
-    {
+    public interface ISettingsRepository
+     {
         Setting Add(Setting setting);
         void Delete(int id);
         Setting Get(int id);

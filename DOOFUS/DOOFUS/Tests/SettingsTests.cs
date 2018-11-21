@@ -16,30 +16,32 @@ namespace DOOFUS.Tests
     [TestFixture]
     public class SettingsTests
     {
-        Mock<SettingsController> mockSettingsController;
-        Mock<SettingDataRepository> mockSettingsRepository;
-        Mock<Setting> mockSetting;        
+        SettingsController mockSettingsController;
+        Mock<ISettingsRepository> mockSettingsRepository;
+        Setting testSetting;        
 
         //Test conditions
-        string failed;
-        string testType;
+        private string failed;
+        private string testType;
 
-        int deviceid = 51;
-        int customerid = 1;
-        string customerids = "1,2,3";
-        string deviceids = "50,12,42";
-        string usernames = "Jody, Victor, Phum, Alex";
+        //status codes
+        private const string preconditionFailed = "412";
 
+        private const int deviceid = 51;
+        private const int customerid = 1;
+        private const string customerids = "1,2,3";
+        private const string deviceids = "50,12,42";
+        private const  string usernames = "Jody, Victor, Phum, Alex";
+        private const string username = "Jody";
         
+        //Initialize mock repository and controller with a test setting
         [SetUp]
         public void Setup()
         {
-            mockSettingsController = new Mock<SettingsController>();
-            mockSettingsRepository = new Mock<SettingDataRepository>();
-            mockSetting = new Mock<Setting>();            
+            mockSettingsRepository = new Mock<ISettingsRepository>();
+            mockSettingsController = new SettingsController(mockSettingsRepository.Object);
 
-            mockSetting.Object.Value = "100";
-            mockSetting.Object.SettingKey = "DisplayBrightness";             
+            testSetting = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
         }
        
         //note: will probably end up changing this all later and making a class layer in between Test and Controller 
@@ -49,43 +51,97 @@ namespace DOOFUS.Tests
             //
             //Test global setting, no override
             //
-            var response = mockSettingsController.Object.PostGlobalSetting(mockSetting.Object, mockSetting.Object.SettingKey, false);
+            var response = mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, false);
             testType ="PostGlobalSetting";
 
             //Using Newtonsoft JSON library to parse the JSON response so we can compare
             var responseString = response.Content.ToString();            
             dynamic jsonObject = JObject.Parse(responseString);
 
-            isEqual(mockSetting.Object.Level, (string)jsonObject.SelectToken("Level"), testType);
-            isEqual(mockSetting.Object.Value, (string)jsonObject.SelectToken("Value"), testType);
-            isEqual(mockSetting.Object.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
 
             //
             //Test global setting, with override
             //
-            response = mockSettingsController.Object.PostGlobalSetting(mockSetting.Object, mockSetting.Object.SettingKey, true);            
+            response = mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, true);            
             testType = "PostGlobalSettingOverride";
 
             //Using Newtonsoft JSON library to parse the JSON response so we can compare
             responseString = response.Content.ToString();
             jsonObject = JObject.Parse(responseString);
 
-            isEqual(mockSetting.Object.Level, (string)jsonObject.SelectToken("Level"), testType);
-            isEqual(mockSetting.Object.Value, (string)jsonObject.SelectToken("Value"), testType);
-            isEqual(mockSetting.Object.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+
+            //
+            //Test global setting, multiple customers with no override
+            //
+            
+            response = mockSettingsController.PostGlobalEntitySetting(testSetting, testSetting.SettingKey, customerids, false);
+            testType = "PostGlobalEntitySetting";
+
+            //Using Newtonsoft JSON library to parse the JSON response so we can compare
+            responseString = response.Content.ToString();
+            jsonObject = JObject.Parse(responseString);
+
+            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+
+            //
+            //Test posting global setting for multiple customers with override
+            //
+            response = mockSettingsController.PostGlobalEntitySetting(testSetting, testSetting.SettingKey, customerids, true);
+            testType = "PostGlobalEntitySettingOverride";
+
+            //This should fail, hence why we test the status code
+            responseString = response.StatusCode.ToString();
+            Assert.AreEqual(responseString, preconditionFailed);
+
+            //
+            //Test posting user setting with no override
+            //
+            response = mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, false);
+            testType = "PostGlobalEntitySettingOverride";
+            
+            responseString = response.Content.ToString();
+            jsonObject = JObject.Parse(responseString);
+
+            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+
+
+
+
 
             //
             //Test customer setting for one or more users no override
             //
-            response = mockSettingsController.Object.PostCustomerSetting(mockSetting.Object, customerid, mockSetting.Object.SettingKey, usernames, false);
+            response = mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, usernames, false);
             testType = "PostCustomerSetting";
             
             responseString = response.Content.ToString();
             jsonObject = JObject.Parse(responseString);
 
-            isEqual(mockSetting.Object.Level, (string)jsonObject.SelectToken("Level"), testType);
-            isEqual(mockSetting.Object.Value, (string)jsonObject.SelectToken("Value"), testType);
-            isEqual(mockSetting.Object.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+            //
+            //Test customer setting for one or more users with override
+            //
+            response = mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, usernames, true);
+            testType = "PostCustomerSettingOverride";
+
+            responseString = response.Content.ToString();
+            jsonObject = JObject.Parse(responseString);
+
+            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
 
         }
 
@@ -105,7 +161,7 @@ namespace DOOFUS.Tests
         public void TestDeletes()
         {
             var response =
-                mockSettingsController.Object.PostGlobalSetting(mockSetting.Object, mockSetting.Object.SettingKey,
+                mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey,
                     false);
             testType = "DeleteGlobalSetting";
             if (response.StatusCode!=HttpStatusCode.Created)
