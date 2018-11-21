@@ -481,6 +481,99 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutGlobalSettingById(System.Int32,DOOFUS.Models.Setting)">
+            <summary>
+            Update global setting by setting ID.
+            </summary>
+            <param name="id"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutGlobalSetting(System.String,DOOFUS.Models.Setting,System.Boolean)">
+            <summary>
+            Update global setting by setting key with option to override lower settings.
+            </summary>
+            <param name="key"></param>
+            <param name="overrideLower"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutCustomerSetting(System.String,DOOFUS.Models.Setting,System.Boolean)">
+            <summary>
+            Update customer setting by setting key with option to override lower settings.
+            </summary>
+            <param name="key"></param>
+            <param name="overrideLower"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutCustomerSettingMultiple(System.String,DOOFUS.Models.Setting,System.String,System.Boolean)">
+            <summary>
+            Update multiple customer setting by setting key with option to override lower settings.
+            </summary>
+            <param name="key"></param>
+            <param name="customerIds"></param>
+            <param name="overrideLower"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutCustomerEntitySetting(System.Int32,System.String,DOOFUS.Models.Setting,System.Boolean)">
+            <summary>
+            Update customer setting by entity ID (customer ID), and setting key with option to override lower settings.
+            </summary>
+            <param name="entityId"></param>
+            <param name="key"></param>
+            <param name="overrideLower"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutDeviceSetting(System.Int32,System.String,DOOFUS.Models.Setting)">
+            <summary>
+            Update device setting by customer ID and setting key.
+            </summary>
+            <param name="customerId"></param>
+            <param name="key"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutDeviceSettingMultiple(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
+            <summary>
+            Update multiple device setting by customer ID and setting key.
+            </summary>
+            <param name="customerId"></param>
+            <param name="key"></param>
+            <param name="deviceIds">Example: 123,456 </param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutDeviceEntitySetting(System.Int32,System.Int32,System.String,DOOFUS.Models.Setting)">
+            <summary>
+            Update device setting by customer ID, entity ID (device ID), and setting key.
+            </summary>
+            <param name="customerId"></param>
+            <param name="entityId"></param>
+            <param name="key"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserSetting(System.Int32,System.String,DOOFUS.Models.Setting)">
+            <summary>
+            Update setting at user level for specific customer ID and setting key.
+            </summary>
+            <param name="customerId"></param>
+            <param name="key"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserEntitySetting(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
+            <summary>
+            Update setting at user level for specific customer ID, entity ID (username), and setting key
+            </summary>
+            <param name="customerId"></param>
+            <param name="entityId"></param>
+            <param name="key"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserSettingMultiple(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
+            <summary>
+            Update setting at user level for multiple users by customer ID and setting key.
+            </summary>
+            <param name="customerId"></param>
+            <param name="key"></param>
+            <param name="usernames">Example: user1, user2, user3</param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteGlobalSettingOverride(System.String,System.Boolean)">
             <summary>
             To delete a single or mutiple settings at gloabal level. with options to override lower level

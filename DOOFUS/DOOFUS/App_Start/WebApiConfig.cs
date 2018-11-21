@@ -71,16 +71,18 @@ namespace DOOFUS
 
             //user
             config.Routes.MapHttpRoute(
+            name: "UserEntity",
+            routeTemplate: "api/{controller}/User/{customer id}/{entity id}/{key}",
+            defaults: new { id = RouteParameter.Optional }
+        );
+
+            config.Routes.MapHttpRoute(
               name: "User",
               routeTemplate: "api/{controller}/User/{customer id}/{key}",
               defaults: new { id = RouteParameter.Optional }
           );          
 
-            config.Routes.MapHttpRoute(
-            name: "UserEntity",
-            routeTemplate: "api/{controller}/User/{customer id}/{entity id}/{key}",
-            defaults: new { id = RouteParameter.Optional }
-        );          
+                  
 
             //device
             config.Routes.MapHttpRoute(

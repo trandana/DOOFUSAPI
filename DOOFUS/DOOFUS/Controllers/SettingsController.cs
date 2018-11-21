@@ -537,6 +537,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //Post device settings for one or more specific device ids
         //settings/device/{customerid}/{key}?deviceids=1,2,50, etc
+        [HttpPost]
         [Route("settings/device/{customerid}/{key}/{deviceids}")]
         public HttpResponseMessage PostDeviceSetting(Setting setting, int customerid, string key, int deviceid)
         {
@@ -622,6 +623,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //PUT Global Level
         //
 
+        /// <summary>
+        /// Update global setting by setting ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+
         //Put setting (global) by id
         [Route("settings/global/{id}")]
         public HttpResponseMessage PutGlobalSettingById(int id, Setting setting)
@@ -647,6 +654,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
             return updatedResponse;
         }
+
+        /// <summary>
+        /// Update global setting by setting key with option to override lower settings.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="overrideLower"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
 
         //Put global with option to override
         [Route("settings/global/{key}/{overrideLower?}")]
@@ -697,6 +711,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //PUT Customer Level
         //
 
+        /// <summary>
+        /// Update customer setting by setting key with option to override lower settings.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="overrideLower"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting (customer) with option to override lower
         [Route("settings/customer/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerSetting(string key, Setting setting, bool overrideLower = false)
@@ -742,6 +762,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
+        /// <summary>
+        /// Update multiple customer settings by setting key with option to override lower settings.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="customerIds"></param>
+        /// <param name="overrideLower"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting (customer) with option to override lower
         //Can update multiple settings by customerIds (csv list of ids)
         [Route("settings/customer/{key}/{customerIds}/{overrideLower?}")]
@@ -817,8 +844,16 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
+
+        /// <summary>
+        /// Update customer setting by entity ID (customer ID), and setting key with option to override lower settings.
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <param name="key"></param>
+        /// <param name="overrideLower"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting - Specific Entity (customer) and override lower
-        [Route("settings/customer/{entityId}/{key}/{overrideLower?}")]
+        [Route("settings/customer/{entityId:int}/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId && x.SettingKey == key
@@ -863,8 +898,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //PUT Device Level      
         //
 
+        /// <summary>
+        /// Update device setting by customer ID and setting key.
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="key"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for device
-        [Route("settings/device/{customerId}/{key}")]
+        [Route("settings/device/{customerId:int}/{key}")]
         public HttpResponseMessage PutDeviceSetting(int customerId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key
@@ -889,8 +930,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
+        /// <summary>
+        /// Update multiple device settings by customer ID and setting key.
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="key"></param>
+        /// <param name="deviceIds">Example: 123,456 </param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for multiple devices
-        [Route("settings/device/{customerId}/{key}/{deviceIds}")]
+        [Route("settings/device/{customerId:int}/{key}/{deviceIds}")]
         public HttpResponseMessage PutDeviceSettingMultiple(int customerId, string key, string deviceIds, Setting setting)
         {
             string[] separated = deviceIds.Split(','); //hold seperated customer IDs
@@ -933,8 +981,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
+        /// <summary>
+        /// Update device setting by customer ID, entity ID (device ID), and setting key.
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="entityId"></param>
+        /// <param name="key"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for device - Specific device
-        [Route("settings/device/{customerId}/{entityId}/{key}")]
+        [Route("settings/device/{customerId:int}/{entityId:int}/{key}")]
         public HttpResponseMessage PutDeviceEntitySetting(int customerId, int entityId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
@@ -964,8 +1019,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //PUT User Level
         //
 
+        /// <summary>
+        /// Update setting at user level for specific customer ID and setting key.
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="key"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for user 
-        [Route("settings/user/{customerId}/{key}")]
+        [Route("settings/user/{customerId:int}/{key}")]
         public HttpResponseMessage PutUserSetting(int customerId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
@@ -990,47 +1051,16 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
-        //put setting for multiple users (multiple usernames csv)
-        [Route("settings/user/{customerId}/{key}/{usernames}")]
-        public HttpResponseMessage PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
-        {
-            string[] separated = usernames.Split(','); //hold seperated usernames
-
-            var currentSettings = new List<Setting>(); //new list to store settings
-
-            for (int i = 0; i < separated.Count(); i++) //place all settings to modify in a list
-            {
-                var settingToAdd = settingRepository.GetAll().Where(x => x.SettingKey == key
-                && x.Level == USER && x.UserName == separated[i]).ToList().FirstOrDefault<Setting>();
-                currentSettings.Add(settingToAdd);
-            }
-
-            if (currentSettings.Count() == 0)
-            {
-                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
-                return notFoundResponse;
-            }
-
-            for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
-            {
-                //replace current setting values with new setting values
-                currentSettings[j] = UpdateSetting(currentSettings[j], setting);
-                
-                if (!settingRepository.Update(currentSettings[j]))
-                {
-                    var updateErrorResponse = Request.CreateResponse(HttpStatusCode.BadRequest, "Update error.");
-                    return updateErrorResponse;
-                }
-
-            }
-
-            //Create HTTP response
-            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
-            return updatedResponse;
-        } 
+        /// <summary>
+        /// Update setting at user level for specific customer ID, entity ID (username), and setting key
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="entityId"></param>
+        /// <param name="key"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
 
         //Put setting for user - Specific entity (username)
-        [Route("settings/user/{customerId}/{entityId}/{key}")]
+        [Route("settings/user/{customerId:int}/{entityId}/{key}")]
         public HttpResponseMessage PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
@@ -1054,6 +1084,57 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
             return updatedResponse;
         }
+
+        /// <summary>
+        /// Update settings at user level for multiple users by customer ID and setting key.
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="key"></param>
+        /// <param name="usernames">Example: user1, user2, user3</param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+
+        //put setting for multiple users
+
+        //NOTE: the route for this function call has been adjusted to "users" rather than "user". This call collides with the call above.
+        [Route("settings/users/{customerId:int}/{key}/{usernames}")]
+        public HttpResponseMessage PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
+        {
+            string[] separated = usernames.Split(','); //hold seperated usernames
+
+            var currentSettings = new List<Setting>(); //new list to store settings
+
+            for (int i = 0; i < separated.Count(); i++) //place all settings to modify in a list
+            {
+                var settingToAdd = settingRepository.GetAll().Where(x => x.SettingKey == key
+                && x.Level == USER && x.UserName == separated[i]).ToList().FirstOrDefault<Setting>();
+                currentSettings.Add(settingToAdd);
+            }
+
+            if (currentSettings.Contains(null))
+            {
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                return notFoundResponse;
+            }
+
+            for (int j = 0; j < currentSettings.Count(); j++) //go through each setting in list and perform nessesary changes
+            {
+                //replace current setting values with new setting values
+                currentSettings[j] = UpdateSetting(currentSettings[j], setting);
+                
+                if (!settingRepository.Update(currentSettings[j]))
+                {
+                    var updateErrorResponse = Request.CreateResponse(HttpStatusCode.BadRequest, "Update error.");
+                    return updateErrorResponse;
+                }
+
+            }
+
+            //Create HTTP response
+            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            return updatedResponse;
+        }
+
+        
 
 
         //
