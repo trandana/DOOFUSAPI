@@ -190,8 +190,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //return response
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                string uri = Url.Link("Global", new { id = setting.Id });
-                response.Headers.Location = new Uri(uri);
+               // string uri = Url.Link("Global", new { id = setting.Id });
+                //response.Headers.Location = new Uri(uri);
 
                 return response;
             }
@@ -261,18 +261,16 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
                 //return success
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                var uri = Url.Link("GlobalEntity", new { id = setting.Id });
-                response.Headers.Location = new Uri(uri);
+                //var uri = Url.Link("GlobalEntity", new { id = setting.Id });
+               // response.Headers.Location = new Uri(uri);
 
                 return response;
             }
             //return failed
             else
             {
-                var uri = Url.Link("Global", new { id = setting.Id });
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.PreconditionFailed, setting);
                 response.Content = new StringContent(EXISTING_ENTRY);
-                response.Headers.Location = new Uri(uri);
 
                 return response;
             }
@@ -371,8 +369,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                      }        
                     //return success response
                     var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    var uri = Url.Link("CustomerEntityOverride", new { id = setting.Id });
-                    response.Headers.Location = new Uri(uri);
+                    //var uri = Url.Link("CustomerEntityOverride", new { id = setting.Id });
+                    //response.Headers.Location = new Uri(uri);
 
                     return response;
                 }
@@ -414,8 +412,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     }
                     //override wasn't specified, we are done here                
                     var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    var uri = Url.Link("CustomerOverride", new { id = setting.Id });                    
-                    response.Headers.Location = new Uri(uri);
+                    //var uri = Url.Link("CustomerOverride", new { id = setting.Id });                    
+                   // response.Headers.Location = new Uri(uri);
 
                     return response;
                 }
