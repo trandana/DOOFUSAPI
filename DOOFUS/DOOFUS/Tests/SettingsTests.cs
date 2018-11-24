@@ -114,10 +114,6 @@ namespace DOOFUS.Tests
             Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
             Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
 
-
-
-
-
             //
             //Test customer setting for one or more users no override
             //

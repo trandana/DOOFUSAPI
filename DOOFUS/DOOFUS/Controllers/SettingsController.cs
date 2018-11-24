@@ -13,7 +13,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 {
     public class SettingsController : ApiController
     {
-        public readonly ISettingsRepository settingRepository;
+        public readonly ISettingsRepository settingRepository = new SettingDataRepository();
 
         public SettingsController() { } //Default constructor
         
