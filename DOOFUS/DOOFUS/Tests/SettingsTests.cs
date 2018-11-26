@@ -144,6 +144,157 @@ namespace DOOFUS.Tests
         [Test]
         public void TestPuts()
         {
+            Setting updateSetting = new Setting { Value = "Updated Value", LastModifiedById = 12345, EndEffectiveDate = null };
+
+            //Test Put setting (global) by id
+            //PutGlobalSettingById(int id, Setting setting)
+
+            int id = 7; //id of global setting to update
+            var response = mockSettingsController.PutGlobalSettingById(id, updateSetting);
+            testType = "PutSettingById";
+
+            //Using Newtonsoft JSON library to parse the JSON response so we can compare
+            var responseString = response.Content.ToString();
+            dynamic jsonObject = JObject.Parse(responseString);
+
+            HttpStatusCode statusCode = response.StatusCode;
+
+            Assert.AreEqual(HttpStatusCode.OK, statusCode);
+            //Check if update succeeded
+            Assert.AreEqual(updateSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(updateSetting.LastModifiedById, (int)jsonObject.SelectToken("LastModifiedById"), testType);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, (DateTime)jsonObject.SelectToken("EndEffectiveDate"), testType);
+
+            
+
+
+            //Put global with option to override
+            //PutGlobalSetting(string key, Setting setting, bool overrideLower = false)
+
+            //Overrride lower = false
+            string key = "newGlobalSetting";
+            response = mockSettingsController.PutGlobalSetting(key, updateSetting, false);
+            testType = "PutGlobalSetting";
+
+            responseString = response.Content.ToString();
+            jsonObject = JObject.Parse(responseString);
+
+            statusCode = response.StatusCode;
+
+            Assert.AreEqual(updateSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+            Assert.AreEqual(updateSetting.LastModifiedById, (int)jsonObject.SelectToken("LastModifiedById"), testType);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, (DateTime)jsonObject.SelectToken("EndEffectiveDate"), testType);
+
+            //override lower = true
+            response = mockSettingsController.PutGlobalSetting(key, updateSetting, true);
+            testType = "PutGlobalSettingOverrideLower";
+
+
+
+
+            //Put setting (customer) with option to override lower
+            //PutCustomerSetting(string key, Setting setting, bool overrideLower = false)
+
+            //overrideLower = false
+            key = "newCustomerSetting";
+            response = mockSettingsController.PutCustomerSetting(key, updateSetting, false);
+            testType = "PutGlobalSetting";
+
+            //override lower = true
+            key = "newCustomerSetting";
+            response = mockSettingsController.PutCustomerSetting(key, updateSetting, true);
+            testType = "PutGlobalSettingOverrideLower";
+
+
+
+
+            //Put mutliple settings (customer) with option to override lower
+            //PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
+
+            key = "multipleCustomers";
+
+            //override lower = false
+            response = mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, false);
+            testType = "PutCustomerSettingMultiple";
+
+            //overrride lower = true
+            response = mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, true);
+            testType = "PutCustomerSettingMultipleOverrideLower";
+
+
+
+
+            //Put setting - Specific Entity (customer) and override lower
+            //PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
+
+            int entityId = 123;
+            key = "customerEntitySetting";
+
+            //override lower = false
+            response = mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, false);
+            testType = "PutCustomerEntitySetting";
+
+            //overrride lower = true
+            response = mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, true);
+            testType = "PutCustomerEntitySettingOverrideLower";
+
+
+
+
+            //Put setting for device
+            //PutDeviceSetting(int customerId, string key, Setting setting)
+            int customerId = 111;
+            key = "deviceSetting";
+
+            response = mockSettingsController.PutDeviceSetting(customerId, key, updateSetting);
+            testType = "PutDeviceSetting";
+            
+
+
+            //Put setting for multiple devices
+            //PutDeviceSettingMultiple(int customerId, string key, string deviceIds, Setting setting)
+
+            customerId = 123;
+            key = "multipleDeviceSetting";
+
+            response = mockSettingsController.PutDeviceSettingMultiple(customerId, key, deviceids, updateSetting);
+            testType = "PutDeviceSettingMultiple";
+
+
+
+
+            //Put setting for device - Specific device
+            //PutDeviceEntitySetting(int customerId, int entityId, string key, Setting setting)
+            key = "deviceEntitySetting";
+            entityId = 99;
+
+            response = mockSettingsController.PutDeviceEntitySetting(customerId, entityId, key, updateSetting);
+            testType = "PutDeviceEntitySetting";
+
+
+
+
+            //Put setting for user 
+            //PutUserSetting(int customerId, string key, Setting setting)
+            response = mockSettingsController.PutUserSetting(customerId, key, updateSetting);
+            testType = "PutUserSetting";
+
+
+
+
+            //Put setting for user - Specific entity (username)
+            //PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
+            var entityid = "user";
+            response = mockSettingsController.PutUserEntitySetting(customerId, entityid, key, updateSetting);
+            testType = "PutUserEntitySetting";
+
+
+
+
+            //put setting for multiple users
+            //PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
+            response = mockSettingsController.PutUserEntitySetting(customerId, key, usernames, updateSetting);
+            testType = "PutUserEntitySetting";
             
         }
 

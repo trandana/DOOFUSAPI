@@ -486,21 +486,24 @@
             Update global setting by setting ID.
             </summary>
             <param name="id"></param>
-            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+            <param name="setting"></param>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update. Returns 404 if setting not found.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutGlobalSetting(System.String,DOOFUS.Models.Setting,System.Boolean)">
             <summary>
             Update global setting by setting key with option to override lower settings.
             </summary>
             <param name="key"></param>
+            <param name="setting"></param>
             <param name="overrideLower"></param>
-            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update. Returns 404 if setting not found.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutCustomerSetting(System.String,DOOFUS.Models.Setting,System.Boolean)">
             <summary>
             Update customer setting by setting key with option to override lower settings.
             </summary>
             <param name="key"></param>
+            <param name="setting"></param>
             <param name="overrideLower"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
@@ -509,6 +512,7 @@
             Update multiple customer settings by setting key with option to override lower settings.
             </summary>
             <param name="key"></param>
+            <param name="setting"></param>
             <param name="customerIds"></param>
             <param name="overrideLower"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
@@ -519,6 +523,7 @@
             </summary>
             <param name="entityId"></param>
             <param name="key"></param>
+            <param name="setting"></param>
             <param name="overrideLower"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
@@ -528,6 +533,7 @@
             </summary>
             <param name="customerId"></param>
             <param name="key"></param>
+            <param name="setting"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutDeviceSettingMultiple(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
@@ -537,6 +543,7 @@
             <param name="customerId"></param>
             <param name="key"></param>
             <param name="deviceIds">Example: 123,456 </param>
+            <param name="setting"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutDeviceEntitySetting(System.Int32,System.Int32,System.String,DOOFUS.Models.Setting)">
@@ -546,6 +553,7 @@
             <param name="customerId"></param>
             <param name="entityId"></param>
             <param name="key"></param>
+            <param name="setting"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserSetting(System.Int32,System.String,DOOFUS.Models.Setting)">
@@ -554,6 +562,7 @@
             </summary>
             <param name="customerId"></param>
             <param name="key"></param>
+            <param name="setting"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserEntitySetting(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
@@ -563,6 +572,7 @@
             <param name="customerId"></param>
             <param name="entityId"></param>
             <param name="key"></param>
+            <param name="setting"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutUserSettingMultiple(System.Int32,System.String,System.String,DOOFUS.Models.Setting)">
@@ -572,6 +582,7 @@
             <param name="customerId"></param>
             <param name="key"></param>
             <param name="usernames">Example: user1, user2, user3</param>
+            <param name="setting"></param>
             <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.DeleteGlobalSettingOverride(System.String,System.Boolean)">

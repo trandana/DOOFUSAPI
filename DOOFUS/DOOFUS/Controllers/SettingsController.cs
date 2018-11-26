@@ -583,21 +583,25 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         /// <summary>
-        /// Update global setting by setting ID.
+        /// Update setting by setting ID. Works with any level and can update any setting by ID.
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        /// <param name="setting"></param>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update. Returns 404 if setting not found.</returns>
 
-        //Put setting (global) by id
+        //Put setting by id
         [Route("settings/global/{id}")]
         public HttpResponseMessage PutGlobalSettingById(int id, Setting setting)
         {
+            var currentSetting = new Setting();
             //get setting to update by id
-            var currentSetting = settingRepository.Get(id);
-
-            if (currentSetting == null)
+            try
             {
-                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                currentSetting = settingRepository.Get(id);
+            }
+            catch (NullReferenceException)
+            {
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.NotFound, "Setting not found");
                 return notFoundResponse;
             }
 
@@ -610,7 +614,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest, "Update error");
             }
 
-            var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
             return updatedResponse;
         }
 
@@ -618,18 +622,23 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// Update global setting by setting key with option to override lower settings.
         /// </summary>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <param name="overrideLower"></param>
-        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update. Returns 404 if setting not found.</returns>
 
         //Put global with option to override
         [Route("settings/global/{key}/{overrideLower?}")]
         public HttpResponseMessage PutGlobalSetting(string key, Setting setting, bool overrideLower = false)
         {
-            var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
-
-            if (currentSetting == null)
+            var currentSetting = new Setting();
+            
+            try
             {
-                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                currentSetting = currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
+            }
+            catch (NullReferenceException)
+            {
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.NotFound, "Setting not found");
                 return notFoundResponse;
             }
 
@@ -649,9 +658,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     .Where(x => x.SettingKey == key &&
                     x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
 
-                if (listOfCurrentSettings.Count == 0)
+                if (listOfCurrentSettings.Contains(null))
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to overrride.");
                     return notFoundResponse;
                 }
 
@@ -660,9 +669,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     settingRepository.Delete(listOfCurrentSettings[i].Id);
                 }
+
+                //Create HTTP response for overriding lower
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                return overrideResponse;
             }
             //Create HTTP response
-            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK);
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
             return updatedResponse;
         }
 
@@ -674,6 +687,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// Update customer setting by setting key with option to override lower settings.
         /// </summary>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <param name="overrideLower"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting (customer) with option to override lower
@@ -703,7 +717,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     .Where(x => x.SettingKey == key &&
                     x.Level == DEVICE || x.Level == USER).ToList();
 
-                if (listOfCurrentSettings.Count == 0)
+                if (listOfCurrentSettings.Contains(null))
                 {
                     var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
                     return notFoundResponse;
@@ -714,10 +728,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     settingRepository.Delete(listOfCurrentSettings[i].Id);
                 }
+
+                //Create HTTP response for overriding lower
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                return overrideResponse;
             }
 
             //Create HTTP response
-            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK);
+            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
             return updatedResponse;
         }
 
@@ -725,10 +743,11 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// Update multiple customer settings by setting key with option to override lower settings.
         /// </summary>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <param name="customerIds"></param>
         /// <param name="overrideLower"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
-        //Put setting (customer) with option to override lower
+        //Put mutliple settings (customer) with option to override lower
         //Can update multiple settings by customerIds (csv list of ids)
         [Route("settings/customer/{key}/{customerIds}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
@@ -753,7 +772,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             if (currentSettings.Contains(null))
             {
-                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
+                var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest, "Setting not found");
                 return notFoundResponse;
             }
 
@@ -783,8 +802,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     x.Level == USER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
                 }
 
-
-                if (currentSettings.Contains(null))
+                if (currentSettingsToOverride.Contains(null))
                 {
                     var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
                     return notFoundResponse;
@@ -796,10 +814,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     settingRepository.Delete(currentSettingsToOverride[k].Id);
                 }
 
+                //Create HTTP response for overriding lower
+                var overrideResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings, "Override successful");
+                return overrideResponse;
+
             }
 
             //Create HTTP response
-            var updatedResponse = Request.CreateResponse(HttpStatusCode.OK);
+            var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
             return updatedResponse;
         }
 
@@ -809,6 +831,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// </summary>
         /// <param name="entityId"></param>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <param name="overrideLower"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting - Specific Entity (customer) and override lower
@@ -848,8 +871,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     settingRepository.Delete(listOfCurrentSettings[i].Id);
                 }
 
+                //Create HTTP response for overriding lower
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                return overrideResponse;
+
             }
-            var response = Request.CreateResponse(HttpStatusCode.OK);
+            var response = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
             return response;
         }
 
@@ -862,6 +889,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// </summary>
         /// <param name="customerId"></param>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for device
         [Route("settings/device/{customerId:int}/{key}")]
@@ -895,6 +923,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="customerId"></param>
         /// <param name="key"></param>
         /// <param name="deviceIds">Example: 123,456 </param>
+        /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for multiple devices
         [Route("settings/device/{customerId:int}/{key}/{deviceIds}")]
@@ -946,6 +975,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="customerId"></param>
         /// <param name="entityId"></param>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for device - Specific device
         [Route("settings/device/{customerId:int}/{entityId:int}/{key}")]
@@ -983,6 +1013,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// </summary>
         /// <param name="customerId"></param>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for user 
         [Route("settings/user/{customerId:int}/{key}")]
@@ -1016,6 +1047,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="customerId"></param>
         /// <param name="entityId"></param>
         /// <param name="key"></param>
+        /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
 
         //Put setting for user - Specific entity (username)
@@ -1050,6 +1082,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="customerId"></param>
         /// <param name="key"></param>
         /// <param name="usernames">Example: user1, user2, user3</param>
+        /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
 
         //put setting for multiple users
@@ -1066,6 +1099,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             {
                 var settingToAdd = settingRepository.GetAll().Where(x => x.SettingKey == key
                 && x.Level == USER && x.UserName == separated[i]).ToList().FirstOrDefault<Setting>();
+
                 currentSettings.Add(settingToAdd);
             }
 
@@ -1079,7 +1113,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             {
                 //replace current setting values with new setting values
                 currentSettings[j] = UpdateSetting(currentSettings[j], setting);
-                
+
                 if (!settingRepository.Update(currentSettings[j]))
                 {
                     var updateErrorResponse = Request.CreateResponse(HttpStatusCode.BadRequest, "Update error.");
@@ -1093,7 +1127,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return updatedResponse;
         }
 
-        
+
 
 
         //
