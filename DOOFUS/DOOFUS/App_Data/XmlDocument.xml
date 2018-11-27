@@ -483,7 +483,7 @@
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutGlobalSettingById(System.Int32,DOOFUS.Models.Setting)">
             <summary>
-            Update global setting by setting ID.
+            Update setting by setting ID. Works with any level and can update any setting by ID.
             </summary>
             <param name="id"></param>
             <param name="setting"></param>

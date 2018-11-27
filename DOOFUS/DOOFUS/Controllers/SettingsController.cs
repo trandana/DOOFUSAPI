@@ -1379,7 +1379,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             foreach (var deviceIdString in divided)
             {
                 int deviceId=Int32.Parse(deviceIdString);
-              
                 var setting = settingRepository.GetDeviceSetting(customerid, key, deviceId);
                 if (setting != null)
                 {
@@ -1423,7 +1422,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 settingRepository.Delete(setting.Id);
             }
             
-            var response = Request.CreateResponse<String>(HttpStatusCode.OK, "DELETED");
+            var response = Request.CreateResponse(HttpStatusCode.OK, "DELETED");
             return response;//delete the setting and return it
         }
 
