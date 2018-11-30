@@ -481,6 +481,49 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PostGlobalSetting(DOOFUS.Models.Setting,System.String,System.Boolean)">
+            <summary>
+            Post a setting (global) 
+            </summary>
+            <param name="key">Setting Key</param>
+            <param name="overrideLower">example: true</param>
+            <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PostGlobalEntitySetting(DOOFUS.Models.Setting,System.String,System.String,System.Boolean)">
+             <summary>
+             Post a setting (global) 
+             </summary>
+             <param name="key">Setting Key</param>
+             <param name="overrideLower">example: true</param>
+             /// <param name="customerids">example: 1,2,3</param>
+             <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+            Post a setting (global) to multiple customers - with option to override
+            settings/global/{key}?customerids=1,2,50, etc
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PostCustomerSetting(DOOFUS.Models.Setting,System.Int32,System.String,System.String,System.Boolean)">
+             <summary>
+             Post a setting (global) 
+             </summary>
+             <param name="customerid">Which Customer is it For</param>
+             <param name="overrideLower">example: true</param>
+             /// <param name="customerids">example: 1,2,3</param>
+             <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+            Post a setting for one or more users or devices (entityid can be either) and optionally override lower levels
+            If device id's were sent, override lower does nothing since we are already at the lowest level
+            settings/customer/{customerid}/{key}{entityids}/{overrideLower:bool?}
+        </member>
+        <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PostUserEntitySetting(DOOFUS.Models.Setting,System.Int32,System.String,System.String,System.Boolean)">
+             <summary>
+             Post a setting (global) 
+             </summary>
+             <param name="customerid">Which Customer is it For</param>
+             <param name="username">Which user this is for. Example: Jason</param>
+             <param name="key">Setting Key</param>
+             <param name="overrideLower">If you want to override lower levels. Example: True</param>
+             <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+            Post a user setting for specific user with option to  override lower
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PostDeviceSetting(DOOFUS.Models.Setting,System.Int32,System.String,System.String)" -->
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutGlobalSettingById(System.Int32,DOOFUS.Models.Setting)">
             <summary>
             Update setting by setting ID. Works with any level and can update any setting by ID.
@@ -515,7 +558,7 @@
             <param name="setting"></param>
             <param name="customerIds"></param>
             <param name="overrideLower"></param>
-            <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
+            <returns>Returns 200 on successful update and returns 400 on unsuccessful update.</returns>
         </member>
         <member name="M:DOOFUS.Nhbnt.Web.Controllers.SettingsController.PutCustomerEntitySetting(System.Int32,System.String,DOOFUS.Models.Setting,System.Boolean)">
             <summary>

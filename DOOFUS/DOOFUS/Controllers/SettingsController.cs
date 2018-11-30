@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Web.Http;
 //using System.Web.Mvc;
 
@@ -21,14 +22,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         {
             settingRepository = testSettingRepository;
         }
-        
-        
 
         public const string GLOBAL = "Global";
         public const string CUSTOMER = "Customer";
         public const string USER = "User";
         public const string DEVICE = "Device";
         public const string EXISTING_ENTRY = "The setting already exists!";
+        public const string SUCCESS = "Transaction completed successfully";
 
         //GET a global setting
         //**
@@ -155,12 +155,17 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
         //
         //POST Global Level
-        //       
+        //
 
-        //TESTED
-        //Post a setting (global)       
-        //Non override tested and working. Override still needs testing
+        /// <summary>
+        /// Post a setting (global) 
+        /// </summary>
+        /// <param name="key">Setting Key</param>
+        /// <param name="overrideLower">example: true</param>
+        /// <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
         //Post a global setting with option to override lower levels
+        //**
+      
         [Route("settings/global/{key}/{overrideLower:bool?}")]
         public HttpResponseMessage PostGlobalSetting(Setting setting, string key, bool overrideLower = false)
         {
@@ -190,8 +195,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //return response
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-               // string uri = Url.Link("Global", new { id = setting.Id });
-                //response.Headers.Location = new Uri(uri);
+                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -199,15 +203,23 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             {
                 //return response
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.PreconditionFailed, setting);
-                response.Content = new StringContent(EXISTING_ENTRY);                
+                response.Content = new StringContent(EXISTING_ENTRY);               
 
                 return response;
             }
         }
 
-        //Non override tested and working. Override still needs testing
-        //Post a setting (global) to multiple customers - with option to override
-        //settings/global/{key}?customerids=1,2,50, etc
+        /// <summary>
+        /// Post a setting (global) 
+        /// </summary>
+        /// <param name="key">Setting Key</param>
+        /// <param name="overrideLower">example: true</param>
+        /// /// <param name="customerids">example: 1,2,3</param>
+        /// <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+        ///Post a setting (global) to multiple customers - with option to override
+        ///settings/global/{key}?customerids=1,2,50, etc
+        //**
+
         [Route("settings/global/{key}/{customerids}/{overrideLower:bool?}")]
         public HttpResponseMessage PostGlobalEntitySetting(Setting setting, string key, string customerids, bool overrideLower = false)
         {
@@ -261,8 +273,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
                 //return success
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                //var uri = Url.Link("GlobalEntity", new { id = setting.Id });
-               // response.Headers.Location = new Uri(uri);
+                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -276,65 +287,21 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
         }
 
-        ////Post a global setting - Specific customer id with option to override lower levels
-        //[Route("settings/global/{key}/{customerid}/{overrideLower:bool?}")]
-        //public HttpResponseMessage PostGlobalEntitySettingOverride(Setting setting,  string key, int customerid, bool overrideLower = false)
-        //{
-        //    if (!settingRepository.DoesSettingExist(setting)) //check if setting already exists
-        //    {
-        //        setting.Level = GLOBAL;
-        //        setting.SettingKey = key;
-        //        setting.LastModifiedBy = GLOBAL;
-        //        setting.LastModifiedTimeStamp = DateTime.UtcNow;
-        //        setting.CreatedTimeStamp = DateTime.UtcNow;
-        //        setting.StartEffectiveDate = DateTime.UtcNow;
-
-        //        //Get list of existing settings which match the incoming one, if any
-        //        var SettingList = settingRepository.GetAll()
-        //           .Where(c => c.SettingKey == key && c.CustomerId == customerid).ToList();
-
-        //        if(overrideLower)
-        //        {
-        //            if (SettingList.Count() > 0)
-        //            {
-        //                foreach (var c in SettingList)
-        //                {
-        //                    setting.Level = c.Level;
-        //                    setting.Id = c.Id;
-        //                    settingRepository.Update(setting);
-        //                }
-        //            }
-        //        }
-        //        else //no override, just add
-        //        {                    
-        //            settingRepository.Add(setting);                    
-        //        }
-
-
-        //        var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-
-        //        var uri = Url.Link("GlobalEntityOverride", new { id = setting.Id });
-        //        response.Headers.Location = new Uri(uri);
-
-        //        return response;
-        //    }
-        //    else
-        //    {
-        //        var uri = Url.Link("Global", new { id = setting.Id });
-        //        var response = Request.CreateResponse<Setting>(HttpStatusCode.PreconditionFailed, setting);
-        //        response.Content = new StringContent(EXISTING_ENTRY);
-        //        response.Headers.Location = new Uri(uri);
-
-        //        return response;
-        //    }
-        //}
-
         //
         //POST Customer Level
         //
 
-        //Post a setting for one or more users or devices (entityid can be either) and optionally override lower levels
-        //If device id's were sent, override lower does nothing since we are already at the lowest level
+        /// <summary>
+        /// Post a setting (global) 
+        /// </summary>
+        /// <param name="customerid">Which Customer is it For</param>
+        /// <param name="overrideLower">example: true</param>
+        /// /// <param name="customerids">example: 1,2,3</param>
+        /// <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+        ///Post a setting for one or more users or devices (entityid can be either) and optionally override lower levels
+        ///If device id's were sent, override lower does nothing since we are already at the lowest level
+        ///settings/customer/{customerid}/{key}{entityids}/{overrideLower:bool?}
+        //**
         [Route("settings/customer/{customerid}/{key}/{entityids}/{overrideLower:bool?}")]
         public HttpResponseMessage PostCustomerSetting(Setting setting, int customerid, string key, string entityids, bool overrideLower = false)
         {
@@ -412,8 +379,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     }
                     //override wasn't specified, we are done here                
                     var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    //var uri = Url.Link("CustomerOverride", new { id = setting.Id });                    
-                   // response.Headers.Location = new Uri(uri);
+                    response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                     return response;
                 }
@@ -426,13 +392,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return response;
             }
         }
-
-
         //
         //POST User Level
-        //      
+        //  
+        /// <summary>
+        /// Post a setting (global) 
+        /// </summary>
+        /// <param name="customerid">Which Customer is it For</param>
+        /// <param name="username">Which user this is for. Example: Jason</param>
+        /// <param name="key">Setting Key</param>
+        /// <param name="overrideLower">If you want to override lower levels. Example: True</param>
+        /// <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
+        ///Post a user setting for specific user with option to  override lower
+        //**
 
-        //Post a user setting for specific user with option to  override lower
         [Route("settings/user/{customerid}/{username}/{key}/{overrideLower:bool?}")]
         public HttpResponseMessage PostUserEntitySetting(Setting setting, int customerid, string username, string key, bool overrideLower = false)
         {
@@ -469,8 +442,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                var uri = Url.Link("UserEntity", new { id = setting.Id });
-                response.Headers.Location = new Uri(uri);
+                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -486,9 +458,17 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
         //POST Device Level
         //
-
-        //Post device settings for one or more specific device ids
-        //settings/device/{customerid}/{key}?deviceids=1,2,50, etc
+        
+        /// <summary>
+        /// Post a setting (global) 
+        /// </summary>
+        /// <param name="customerid">Which Customer is it For</param>
+        /// <param name="key">Setting Key</param>
+        /// <param name="deviceids">Can submit one or multiple device ids separated by commas. Example: 1,2,3 </param>
+        /// <returns>Post device settings for one or more specific device ids
+        ///settings/device/{customerid}/{key}?deviceids=1,2,50, etc
+        //**
+        //
         [Route("settings/device/{customerid}/{key}/{deviceids}")]
         public HttpResponseMessage PostDeviceSetting(Setting setting, int customerid, string key, string deviceids)
         {
@@ -514,8 +494,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }             
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                var uri = Url.Link("DeviceOverride", new { id = setting.Id });
-                response.Headers.Location = new Uri(uri);
+                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -672,10 +651,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //Create HTTP response for overriding lower
                 var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
             }
             //Create HTTP response
             var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -731,11 +712,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //Create HTTP response for overriding lower
                 var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
             }
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -746,8 +729,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="setting"></param>
         /// <param name="customerIds"></param>
         /// <param name="overrideLower"></param>
-        /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
-        //Put mutliple settings (customer) with option to override lower
+        /// <returns>Returns 200 on successful update and returns 400 on unsuccessful update.</returns>
+        //Put multiple settings (customer) with option to override lower
         //Can update multiple settings by customerIds (csv list of ids)
         [Route("settings/customer/{key}/{customerIds}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
@@ -816,12 +799,14 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //Create HTTP response for overriding lower
                 var overrideResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings, "Override successful");
+                overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
 
             }
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -835,7 +820,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="overrideLower"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting - Specific Entity (customer) and override lower
-        [Route("settings/customer/{entityId:int}/{key}/{overrideLower?}")]
+        [Route("settings/customer/{entityId}/{key}/{overrideLower?}")]
         public HttpResponseMessage PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == entityId && x.SettingKey == key
@@ -873,10 +858,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //Create HTTP response for overriding lower
                 var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
 
             }
             var response = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
+            response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return response;
         }
 
@@ -892,7 +879,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for device
-        [Route("settings/device/{customerId:int}/{key}")]
+        [Route("settings/device/{customerId}/{key}")]
         public HttpResponseMessage PutDeviceSetting(int customerId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key
@@ -914,6 +901,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -926,7 +914,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for multiple devices
-        [Route("settings/device/{customerId:int}/{key}/{deviceIds}")]
+        [Route("settings/device/{customerId}/{key}/{deviceIds}")]
         public HttpResponseMessage PutDeviceSettingMultiple(int customerId, string key, string deviceIds, Setting setting)
         {
             string[] separated = deviceIds.Split(','); //hold seperated customer IDs
@@ -966,6 +954,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -978,7 +967,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for device - Specific device
-        [Route("settings/device/{customerId:int}/{entityId:int}/{key}")]
+        [Route("settings/device/{customerId}/{entityId}/{key}")]
         public HttpResponseMessage PutDeviceEntitySetting(int customerId, int entityId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
@@ -1000,6 +989,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -1016,7 +1006,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
         //Put setting for user 
-        [Route("settings/user/{customerId:int}/{key}")]
+        [Route("settings/user/{customerId}/{key}")]
         public HttpResponseMessage PutUserSetting(int customerId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
@@ -1038,6 +1028,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -1051,7 +1042,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
 
         //Put setting for user - Specific entity (username)
-        [Route("settings/user/{customerId:int}/{entityId}/{key}")]
+        [Route("settings/user/{customerId}/{entityId}/{key}")]
         public HttpResponseMessage PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
         {
             var currentSetting = settingRepository.GetAll().Where(x => x.CustomerId == customerId
@@ -1073,6 +1064,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<Setting>(HttpStatusCode.OK, currentSetting);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
@@ -1088,7 +1080,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //put setting for multiple users
 
         //NOTE: the route for this function call has been adjusted to "users" rather than "user". This call collides with the call above.
-        [Route("settings/users/{customerId:int}/{key}/{usernames}")]
+        [Route("settings/users/{customerId}/{key}/{usernames}")]
         public HttpResponseMessage PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
         {
             string[] separated = usernames.Split(','); //hold seperated usernames
@@ -1124,12 +1116,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             //Create HTTP response
             var updatedResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings);
+            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
-
-
-
-
         //
         //DELETE
         //
@@ -1274,6 +1263,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
             }
 
+            var response = Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+
             return Request.CreateResponse(HttpStatusCode.OK);
 
         }
@@ -1390,6 +1382,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
             }
             var response = Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return response;
         }
 
@@ -1423,6 +1416,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             }
             
             var response = Request.CreateResponse(HttpStatusCode.OK, "DELETED");
+            response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return response;//delete the setting and return it
         }
 

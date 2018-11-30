@@ -12,6 +12,8 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Remoting;
 using System.Web;
+using System.Web.Http;
+using Newtonsoft.Json;
 using NUnit.Framework.Internal;
 
 namespace DOOFUS.Tests
@@ -19,8 +21,8 @@ namespace DOOFUS.Tests
     [TestFixture]
     public class SettingsTests
     {
-        SettingsController mockSettingsController;
-        Mock<ISettingsRepository> mockSettingsRepository;
+        SettingsController _mockSettingsController;
+        Mock<ISettingsRepository> _mockSettingsRepository;
         Setting testSetting;        
 
         //Test conditions
@@ -41,8 +43,10 @@ namespace DOOFUS.Tests
         [SetUp]
         public void Setup()
         {
-            mockSettingsRepository = new Mock<ISettingsRepository>();
-            mockSettingsController = new SettingsController(mockSettingsRepository.Object);
+            _mockSettingsRepository = new Mock<ISettingsRepository>();
+            _mockSettingsController = new SettingsController(_mockSettingsRepository.Object);
+            _mockSettingsController.Request = new HttpRequestMessage();
+            _mockSettingsController.Configuration = new HttpConfiguration();
 
             testSetting = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
         }
@@ -54,21 +58,21 @@ namespace DOOFUS.Tests
             //
             //Test global setting, no override
             //
-            var response = mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, false);
+            var response = _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, false);
             testType ="PostGlobalSetting";
 
             //Using Newtonsoft JSON library to parse the JSON response so we can compare
-            var responseString = response.Content.ToString();            
+            var responseString = response.Content.ToString();
             dynamic jsonObject = JObject.Parse(responseString);
-
-            Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
-            Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
-            Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
+            
+             Assert.AreEqual(testSetting.Level, (string)jsonObject.SelectToken("Level"), testType);
+             Assert.AreEqual(testSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
+             Assert.AreEqual(testSetting.SettingKey, (string)jsonObject.SelectToken("SettingKey"), testType);
 
             //
             //Test global setting, with override
             //
-            response = mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, true);            
+            response = _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, true);            
             testType = "PostGlobalSettingOverride";
 
             //Using Newtonsoft JSON library to parse the JSON response so we can compare
@@ -83,7 +87,7 @@ namespace DOOFUS.Tests
             //Test global setting, multiple customers with no override
             //
             
-            response = mockSettingsController.PostGlobalEntitySetting(testSetting, testSetting.SettingKey, customerids, false);
+            response = _mockSettingsController.PostGlobalEntitySetting(testSetting, testSetting.SettingKey, customerids, false);
             testType = "PostGlobalEntitySetting";
 
             //Using Newtonsoft JSON library to parse the JSON response so we can compare
@@ -97,7 +101,7 @@ namespace DOOFUS.Tests
             //
             //Test posting global setting for multiple customers with override
             //
-            response = mockSettingsController.PostGlobalEntitySetting(testSetting, testSetting.SettingKey, customerids, true);
+            response = _mockSettingsController.PostGlobalEntitySetting(testSetting, testSetting.SettingKey, customerids, true);
             testType = "PostGlobalEntitySettingOverride";
 
             //This should fail, hence why we test the status code
@@ -107,7 +111,7 @@ namespace DOOFUS.Tests
             //
             //Test posting user setting with no override
             //
-            response = mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, false);
+            response = _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, false);
             testType = "PostGlobalEntitySettingOverride";
             
             responseString = response.Content.ToString();
@@ -120,7 +124,7 @@ namespace DOOFUS.Tests
             //
             //Test customer setting for one or more users no override
             //
-            response = mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, usernames, false);
+            response = _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, usernames, false);
             testType = "PostCustomerSetting";
             
             responseString = response.Content.ToString();
@@ -132,7 +136,7 @@ namespace DOOFUS.Tests
             //
             //Test customer setting for one or more users with override
             //
-            response = mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, usernames, true);
+            response = _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, usernames, true);
             testType = "PostCustomerSettingOverride";
 
             responseString = response.Content.ToString();
@@ -153,7 +157,7 @@ namespace DOOFUS.Tests
             //PutGlobalSettingById(int id, Setting setting)
 
             int id = 7; //id of global setting to update
-            var response = mockSettingsController.PutGlobalSettingById(id, updateSetting);
+            var response = _mockSettingsController.PutGlobalSettingById(id, updateSetting);
             testType = "PutSettingById";
 
             //Using Newtonsoft JSON library to parse the JSON response so we can compare
@@ -176,7 +180,7 @@ namespace DOOFUS.Tests
 
             //Overrride lower = false
             string key = "newGlobalSetting";
-            response = mockSettingsController.PutGlobalSetting(key, updateSetting, false);
+            response = _mockSettingsController.PutGlobalSetting(key, updateSetting, false);
             testType = "PutGlobalSetting";
 
             responseString = response.Content.ToString();
@@ -189,7 +193,7 @@ namespace DOOFUS.Tests
             Assert.AreEqual(updateSetting.EndEffectiveDate, (DateTime)jsonObject.SelectToken("EndEffectiveDate"), testType);
 
             //override lower = true
-            response = mockSettingsController.PutGlobalSetting(key, updateSetting, true);
+            response = _mockSettingsController.PutGlobalSetting(key, updateSetting, true);
             testType = "PutGlobalSettingOverrideLower";
 
 
@@ -200,12 +204,12 @@ namespace DOOFUS.Tests
 
             //overrideLower = false
             key = "newCustomerSetting";
-            response = mockSettingsController.PutCustomerSetting(key, updateSetting, false);
+            response = _mockSettingsController.PutCustomerSetting(key, updateSetting, false);
             testType = "PutGlobalSetting";
 
             //override lower = true
             key = "newCustomerSetting";
-            response = mockSettingsController.PutCustomerSetting(key, updateSetting, true);
+            response = _mockSettingsController.PutCustomerSetting(key, updateSetting, true);
             testType = "PutGlobalSettingOverrideLower";
 
 
@@ -217,11 +221,11 @@ namespace DOOFUS.Tests
             key = "multipleCustomers";
 
             //override lower = false
-            response = mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, false);
+            response = _mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, false);
             testType = "PutCustomerSettingMultiple";
 
             //overrride lower = true
-            response = mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, true);
+            response = _mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, true);
             testType = "PutCustomerSettingMultipleOverrideLower";
 
 
@@ -234,11 +238,11 @@ namespace DOOFUS.Tests
             key = "customerEntitySetting";
 
             //override lower = false
-            response = mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, false);
+            response = _mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, false);
             testType = "PutCustomerEntitySetting";
 
             //overrride lower = true
-            response = mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, true);
+            response = _mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, true);
             testType = "PutCustomerEntitySettingOverrideLower";
 
 
@@ -249,7 +253,7 @@ namespace DOOFUS.Tests
             int customerId = 111;
             key = "deviceSetting";
 
-            response = mockSettingsController.PutDeviceSetting(customerId, key, updateSetting);
+            response = _mockSettingsController.PutDeviceSetting(customerId, key, updateSetting);
             testType = "PutDeviceSetting";
             
 
@@ -260,7 +264,7 @@ namespace DOOFUS.Tests
             customerId = 123;
             key = "multipleDeviceSetting";
 
-            response = mockSettingsController.PutDeviceSettingMultiple(customerId, key, deviceids, updateSetting);
+            response = _mockSettingsController.PutDeviceSettingMultiple(customerId, key, deviceids, updateSetting);
             testType = "PutDeviceSettingMultiple";
 
 
@@ -271,7 +275,7 @@ namespace DOOFUS.Tests
             key = "deviceEntitySetting";
             entityId = 99;
 
-            response = mockSettingsController.PutDeviceEntitySetting(customerId, entityId, key, updateSetting);
+            response = _mockSettingsController.PutDeviceEntitySetting(customerId, entityId, key, updateSetting);
             testType = "PutDeviceEntitySetting";
 
 
@@ -279,7 +283,7 @@ namespace DOOFUS.Tests
 
             //Put setting for user 
             //PutUserSetting(int customerId, string key, Setting setting)
-            response = mockSettingsController.PutUserSetting(customerId, key, updateSetting);
+            response = _mockSettingsController.PutUserSetting(customerId, key, updateSetting);
             testType = "PutUserSetting";
 
 
@@ -288,7 +292,7 @@ namespace DOOFUS.Tests
             //Put setting for user - Specific entity (username)
             //PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
             var entityid = "user";
-            response = mockSettingsController.PutUserEntitySetting(customerId, entityid, key, updateSetting);
+            response = _mockSettingsController.PutUserEntitySetting(customerId, entityid, key, updateSetting);
             testType = "PutUserEntitySetting";
 
 
@@ -296,7 +300,7 @@ namespace DOOFUS.Tests
 
             //put setting for multiple users
             //PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
-            response = mockSettingsController.PutUserEntitySetting(customerId, key, usernames, updateSetting);
+            response = _mockSettingsController.PutUserEntitySetting(customerId, key, usernames, updateSetting);
             testType = "PutUserEntitySetting";
             
         }
@@ -314,192 +318,192 @@ namespace DOOFUS.Tests
 
             //Global delete
             testType = "DeleteSingleGlobalSettingWithFalse";
-            mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey,
+            _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey,
                 false);
-            var response = mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey);
+            var response = _mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteSingleGlobalSettingWithFalse(Dont exist)";
-            response = mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey, false);
+            response = _mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey, false);
             Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode, testType);
 
             testType = "DeleteSingleGlobalSettingWithFalse(No key provided)";
-            response = mockSettingsController.DeleteGlobalSettingOverride("", false);
+            response = _mockSettingsController.DeleteGlobalSettingOverride("", false);
             Assert.AreEqual(HttpStatusCode.BadRequest,response.StatusCode, testType);
 
             testType = "DeleteMutipleGlobalSettingWithFalse";
-            mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey);
-            mockSettingsController.PostGlobalSetting(testSetting, Key);
-            response = mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey + "," + "Key", false);
+            _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey);
+            _mockSettingsController.PostGlobalSetting(testSetting, Key);
+            response = _mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey + "," + "Key", false);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteSingleGlobalSettingWithTrue";
-            mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey);
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey);
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            response = mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey, true);
+            response = _mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey, true);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteMutipleGlobalSettingWithTrue";
-            mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey);
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey);
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostGlobalSetting(testSetting, Key);
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
+            _mockSettingsController.PostGlobalSetting(testSetting, Key);
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
                 false);
-            response = mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey + "," + "Key", true);
+            response = _mockSettingsController.DeleteGlobalSettingOverride(testSetting.SettingKey + "," + "Key", true);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
 
             //Customer delete, override all
             testType = "DeleteCustomerSettingwithFalse(with no id)";
-            response = mockSettingsController.DeleteCustomerEntitySettingOverride("", testSetting.SettingKey, false);
+            response = _mockSettingsController.DeleteCustomerEntitySettingOverride("", testSetting.SettingKey, false);
             Assert.AreEqual(HttpStatusCode.BadRequest,response.StatusCode);
 
             testType = "DeleteCustomerSettingWithFalse(with no key)";
-            response = mockSettingsController.DeleteCustomerEntitySettingOverride(customerid.ToString(), "", false);
+            response = _mockSettingsController.DeleteCustomerEntitySettingOverride(customerid.ToString(), "", false);
             Assert.AreEqual(HttpStatusCode.BadRequest,response.StatusCode);
 
             testType = "DeleteSingleCustomerSetting with false";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            response = mockSettingsController.DeleteCustomerEntitySettingOverride(customerid.ToString(), testSetting.SettingKey,
+            response = _mockSettingsController.DeleteCustomerEntitySettingOverride(customerid.ToString(), testSetting.SettingKey,
                 false);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode);
 
             testType = "DeleteMutipleCustomerSetting(different key) with false";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
                 false);
-            response = mockSettingsController.DeleteCustomerEntitySettingOverride(customerid.ToString(),
+            response = _mockSettingsController.DeleteCustomerEntitySettingOverride(customerid.ToString(),
                 testSetting.SettingKey + "," + Key, false);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteMutipleCustomerSetting(different Id) with false";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostCustomerSetting(testSetting, 2, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, 2, testSetting.SettingKey, username,
                 false);
-            response = mockSettingsController.DeleteCustomerEntitySettingOverride(
+            response = _mockSettingsController.DeleteCustomerEntitySettingOverride(
                 2.ToString() + "," + customerid.ToString(), testSetting.SettingKey, false);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode);
 
             testType = "DeleteMutipleCustomerSetting(different Id and keys) with false";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
                 false);
 
-            mockSettingsController.PostCustomerSetting(testSetting, 2, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, 2, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostCustomerSetting(testSetting, 2, Key, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, 2, Key, username,
                 false);
-            response = mockSettingsController.DeleteCustomerEntitySettingOverride(
+            response = _mockSettingsController.DeleteCustomerEntitySettingOverride(
                 customerid.ToString() + "," + 2.ToString(), Key + testSetting.SettingKey, false);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteMutipleSetting(different Id and Keys) with true";
 
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, Key, username,
                 false);
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
 
-            mockSettingsController.PostCustomerSetting(testSetting, 2, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, 2, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostCustomerSetting(testSetting, 2, Key, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, 2, Key, username,
                 false);
-            mockSettingsController.PostUserEntitySetting(testSetting, 2, username, Key, false);
+            _mockSettingsController.PostUserEntitySetting(testSetting, 2, username, Key, false);
 
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             //customer delete, device override
 
             testType = "DeleteCostomerSetting, no setting to be found";
-            response = mockSettingsController.DeleteCustomerSettingDevices(Key, customerid, deviceid.ToString());
+            response = _mockSettingsController.DeleteCustomerSettingDevices(Key, customerid, deviceid.ToString());
             Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode,testType);
 
             testType = "DeleteCustomerSetting, override 1 setting";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
-            response = mockSettingsController.DeleteCustomerSettingDevices(testSetting.SettingKey, customerid,
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
+            response = _mockSettingsController.DeleteCustomerSettingDevices(testSetting.SettingKey, customerid,
                 deviceid.ToString());
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteCustomerSetting, override mutiple setting";
 
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, 52.ToString());
-            response = mockSettingsController.DeleteCustomerSettingDevices(testSetting.SettingKey, customerid,
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, 52.ToString());
+            response = _mockSettingsController.DeleteCustomerSettingDevices(testSetting.SettingKey, customerid,
                 deviceid.ToString()+","+52.ToString());
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             //customer delete, user override
 
             testType = "DeleteCustomerSetting, noSetting to be found";
-            response = mockSettingsController.DeleteCustomerSettingCustomers(customerid, Key, username);
+            response = _mockSettingsController.DeleteCustomerSettingCustomers(customerid, Key, username);
             Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode);
 
             testType = "DeleteCustomerSetting, override 1 setting";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
+            _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
                 false);
-            response=mockSettingsController.DeleteCustomerSettingCustomers(customerid, testSetting.SettingKey, username);
+            response=_mockSettingsController.DeleteCustomerSettingCustomers(customerid, testSetting.SettingKey, username);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteCustomerSetting, override multiple setting";
-            mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
+            _mockSettingsController.PostCustomerSetting(testSetting, customerid, testSetting.SettingKey, username,
                 false);
-            mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
+            _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
                 false);
-            mockSettingsController.PostUserEntitySetting(testSetting, customerid, "Victor", testSetting.SettingKey,
+            _mockSettingsController.PostUserEntitySetting(testSetting, customerid, "Victor", testSetting.SettingKey,
                 false);
-            response = mockSettingsController.DeleteCustomerSettingCustomers(customerid, testSetting.SettingKey,
+            response = _mockSettingsController.DeleteCustomerSettingCustomers(customerid, testSetting.SettingKey,
                 username + "," + "Victor");
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
             
             //device level delete
 
             testType = "DeleteDeviceSetting, no setting to be found";
-            response = mockSettingsController.DeleteDeviceSetting(customerid, deviceid.ToString(), testSetting.SettingKey);
+            response = _mockSettingsController.DeleteDeviceSetting(customerid, deviceid.ToString(), testSetting.SettingKey);
             Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode,testType);
 
             testType = "DeleteDeviceSetting, 1 setting";
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
-            response = mockSettingsController.DeleteDeviceSetting(customerid, deviceid.ToString(), testSetting.SettingKey);
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
+            response = _mockSettingsController.DeleteDeviceSetting(customerid, deviceid.ToString(), testSetting.SettingKey);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             testType = "DeleteDeviceSetting,multipleSetting";
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
-            mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, 52.ToString());
-            response = mockSettingsController.DeleteDeviceSetting(customerid, deviceid + "," + 52.ToString(),
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceid.ToString());
+            _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, 52.ToString());
+            response = _mockSettingsController.DeleteDeviceSetting(customerid, deviceid + "," + 52.ToString(),
                 testSetting.SettingKey);
             Assert.AreEqual(HttpStatusCode.OK,response.StatusCode,testType);
 
             //user level delete
 
             testType = "DeleteUserSetting, no setting to be found";
-            response = mockSettingsController.DeleteUserSetting(customerid, testSetting.SettingKey, username);
+            response = _mockSettingsController.DeleteUserSetting(customerid, testSetting.SettingKey, username);
             Assert.AreEqual(HttpStatusCode.NotFound,response.StatusCode,testType);
 
             testType = "DeleteUserSetting, 1 setting";
-            mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
+            _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
                 false);
-            response = mockSettingsController.DeleteUserSetting(customerid, testSetting.SettingKey, username);
+            response = _mockSettingsController.DeleteUserSetting(customerid, testSetting.SettingKey, username);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, testType);
 
             testType = "DeleteUserSetting, multiple setting";
-            mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
+            _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey,
                 false);
-            mockSettingsController.PostUserEntitySetting(testSetting, customerid, "Victor", testSetting.SettingKey,
+            _mockSettingsController.PostUserEntitySetting(testSetting, customerid, "Victor", testSetting.SettingKey,
                 false);
-            response = mockSettingsController.DeleteUserSetting(customerid, testSetting.SettingKey, username+","+"Victor");
+            response = _mockSettingsController.DeleteUserSetting(customerid, testSetting.SettingKey, username+","+"Victor");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, testType);
         }
 
