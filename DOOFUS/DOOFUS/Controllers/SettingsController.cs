@@ -8,6 +8,8 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Web.Http;
+using Microsoft.Ajax.Utilities;
+
 //using System.Web.Mvc;
 
 namespace DOOFUS.Nhbnt.Web.Controllers
@@ -29,6 +31,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         public const string DEVICE = "Device";
         public const string EXISTING_ENTRY = "The setting already exists!";
         public const string SUCCESS = "Transaction completed successfully";
+
+        public Setting lastSettingUsed;
 
         //GET a global setting
         //**
@@ -176,6 +180,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             setting.CreatedTimeStamp = DateTime.UtcNow;
             setting.StartEffectiveDate = DateTime.UtcNow;
 
+            lastSettingUsed = setting;
+
             if (!settingRepository.DoesSettingExistAtLevel(setting)) //check if setting already exists
             {
                 //Get list of existing settings which match the incoming one, if any
@@ -186,7 +192,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 {
                     foreach (var c in SettingList)
                     {
-                        settingRepository.Delete(c.Id);
+                        if (c != null)
+                        {
+                            settingRepository.Delete(c.Id);
+                        }
                     }
                 }
 
@@ -195,7 +204,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //return response
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+               // response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -249,7 +258,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                         foreach (var c in SettingList)
                         {
-                            settingRepository.Delete(c.Id); //delete the old ones
+                            if (c != null)
+                            {
+                                settingRepository.Delete(c.Id); //delete the old ones
+                            }
                         }
                         //assign a customer id to the setting in each iteration before saving the new setting
                         setting.CustomerId = parsed;
@@ -273,7 +285,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
                 //return success
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+                //response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -336,8 +348,6 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                      }        
                     //return success response
                     var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    //var uri = Url.Link("CustomerEntityOverride", new { id = setting.Id });
-                    //response.Headers.Location = new Uri(uri);
 
                     return response;
                 }
@@ -352,7 +362,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                         for (int i = 0; i < separated.Count(); i++)
                         {
                             var ExistingSetting = settingRepository.GetUserSetting(customerid, key, separated.ElementAt(i));
-                            settingRepository.Delete(ExistingSetting.Id);
+
+                            if (ExistingSetting != null)
+                            {
+                                settingRepository.Delete(ExistingSetting.Id);
+                            }
+                            
                         }
 
                         //User level overwritten, now lets overwrite device level too
@@ -363,7 +378,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                         foreach (var c in SettingList)
                         {
-                            settingRepository.Delete(c.Id);
+                            if (c != null)
+                            {
+                                settingRepository.Delete(c.Id);
+                            }
                         }
                     }
                     else
@@ -379,7 +397,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     }
                     //override wasn't specified, we are done here                
                     var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                    response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+                    //response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                     return response;
                 }
@@ -432,7 +450,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                     {
                         foreach (var c in SettingList)
                         {
-                            settingRepository.Delete(c.Id);
+                            if (c != null)
+                            {
+                                settingRepository.Delete(c.Id);
+                            }
                         }
                     }
                 }
@@ -442,7 +463,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+               // response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }
@@ -494,7 +515,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }             
 
                 var response = Request.CreateResponse<Setting>(HttpStatusCode.Created, setting);
-                response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+                //response.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
 
                 return response;
             }

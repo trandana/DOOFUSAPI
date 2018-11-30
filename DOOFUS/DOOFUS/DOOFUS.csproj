@@ -239,6 +239,7 @@
     <Compile Include="Models\SettingTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\SettingsTests.cs" />
+    <Compile Include="Tests\TokenResponseModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
