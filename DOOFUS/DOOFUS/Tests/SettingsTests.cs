@@ -189,30 +189,35 @@ namespace DOOFUS.Tests
         }
 
         [Test]
-        public void TestPuts()
+        [AsyncStateMachineAttribute(typeof(Task))]
+        public async Task TestPuts()
         {
-            Setting updateSetting = new Setting { Value = "Updated Value", LastModifiedById = 12345, EndEffectiveDate = null };
+            string jsonMessage; //variable to hold json response
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
             //Test Put setting (global) by id
             //PutGlobalSettingById(int id, Setting setting)
 
-            int id = 7; //id of global setting to update
+            int id = 1; //id of global setting to update
+
             var response = _mockSettingsController.PutGlobalSettingById(id, updateSetting);
             testType = "PutSettingById";
 
-            //Using Newtonsoft JSON library to parse the JSON response so we can compare
-            var responseString = response.Content.ToString();
-            dynamic jsonObject = JObject.Parse(responseString);
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
 
-            HttpStatusCode statusCode = response.StatusCode;
+            //Create a Json object based off the string so we can access the individual setting variables
+            TokenResponseModel tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
 
-            Assert.AreEqual(HttpStatusCode.OK, statusCode);
             //Check if update succeeded
-            Assert.AreEqual(updateSetting.Value, (string)jsonObject.SelectToken("Value"), testType);
-            Assert.AreEqual(updateSetting.LastModifiedById, (int)jsonObject.SelectToken("LastModifiedById"), testType);
-            Assert.AreEqual(updateSetting.EndEffectiveDate, (DateTime)jsonObject.SelectToken("EndEffectiveDate"), testType);
+            Assert.AreEqual(updateSetting.Value, tokenResponse.Value, testType);
+            Assert.AreEqual(updateSetting.LastModifiedById, tokenResponse.LastModifiedById, testType);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, tokenResponse.EndEffectiveDate, testType);
 
-            
+            /*
 
 
             //Put global with option to override
@@ -342,7 +347,9 @@ namespace DOOFUS.Tests
             //PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
             response = _mockSettingsController.PutUserEntitySetting(customerId, key, usernames, updateSetting);
             testType = "PutUserEntitySetting";
-            
+
+    */
+
         }
 
         [Test]
