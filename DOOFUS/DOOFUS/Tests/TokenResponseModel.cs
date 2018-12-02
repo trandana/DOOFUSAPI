@@ -8,6 +8,9 @@ namespace DOOFUS.Tests
 {
     public class TokenResponseModel
     {
+        [JsonProperty("Id")]
+        public int Id { get; set; }
+
         [JsonProperty("Value")]
         public string Value { get; set; }
 
