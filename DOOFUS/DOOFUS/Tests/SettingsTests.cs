@@ -214,7 +214,7 @@ namespace DOOFUS.Tests
 
             Assert.IsNotNull(initialPostResponse);
 
-            int id = tokenResponse.Id; //id of global setting to update
+            int id = testSetting.Id; //id of global setting to update
 
             var response = _mockSettingsController.PutGlobalSettingById(id, updateSetting);
             testType = "PutSettingById";
