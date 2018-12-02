@@ -38,11 +38,13 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //GET a global setting
         //**
         [Route("settings/global")]
-        public GetResponse GetGlobalSettingData()
+        public HttpResponseMessage GetGlobalSettingData()
         {
-            var response = new GetResponse();
-            response.Level = GLOBAL;
-            response.Settings = settingRepository.GetGlobalSetting();
+            var settings = new GetResponse();
+            settings.Level = GLOBAL;
+            settings.Settings = settingRepository.GetGlobalSetting();
+
+            var response = Request.CreateResponse<GetResponse>(HttpStatusCode.Created, settings);
             return response;
         }
 

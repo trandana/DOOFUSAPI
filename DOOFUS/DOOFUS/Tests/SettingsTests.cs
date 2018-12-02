@@ -17,6 +17,7 @@ using System.Web.Http;
 using Newtonsoft.Json;
 using NUnit.Framework.Internal;
 using System.Threading.Tasks;
+using System.Web.Http.Routing;
 using NHibernate.Criterion;
 
 namespace DOOFUS.Tests
@@ -442,7 +443,22 @@ namespace DOOFUS.Tests
         public void TestGets()
         {
             /*
+            // https://docs.microsoft.com/en-us/aspnet/web-api/overview/testing-and-debugging/unit-testing-controllers-in-web-api#testing-link-generation
             // Arrange
+            _mockSettingsController.Request = new HttpRequestMessage { 
+               RequestUri = new Uri("http://localhost/settings/global") 
+               };
+
+            _mockSettingsController.Configuration.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional });
+
+            _mockSettingsController.RequestContext.RouteData = new HttpRouteData(
+                route: new HttpRoute(),
+                values: new HttpRouteValueDictionary { { "controller", "global" } });
+            
+            /*
             Setting data = new Setting
             {
                 Value = "dark"
@@ -450,20 +466,25 @@ namespace DOOFUS.Tests
 
             _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(data);
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
-
+            
 
             _mockSettingsController.PostGlobalSetting(data, "Theme");
+            */
 
             // Act
             var response = _mockSettingsController.GetGlobalSettingData();
-
+            
+            /*
             // Assert
             Assert.AreEqual(response.Settings.First().Level, "Global");
             Assert.AreEqual(response.Settings.First().Value, "dark");
             Assert.AreEqual(response.Settings.First().SettingKey, "Theme");
-
             */
-        }    
+
+            Assert.AreEqual(response.Headers.Location.AbsoluteUri, "http://localhost/settings/global");
+            
+            */
+        }
 
         [Test]
         public void TestDeletes()
