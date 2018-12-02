@@ -638,7 +638,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             
             try
             {
-                currentSetting = currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
+                currentSetting = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == GLOBAL).ToList().FirstOrDefault<Setting>();
             }
             catch (NullReferenceException)
             {
