@@ -606,6 +606,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
             Assert.IsNotNull(currentSetting);
+            Assert.AreEqual(currentSetting.Id, id);
             //replace current setting values with new setting values
             currentSetting = UpdateSetting(currentSetting, setting);
 

@@ -193,7 +193,10 @@ namespace DOOFUS.Tests
         [AsyncStateMachineAttribute(typeof(Task))]
         public async Task TestPuts()
         {
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(testSetting);
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
 
             var initialPostResponse = _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, false);
             string jsonMessage; //variable to hold json response
@@ -230,7 +233,8 @@ namespace DOOFUS.Tests
 
             //Check if update succeeded
             Assert.AreEqual(updateSetting.Value, tokenResponse.Value, testType);
-            Assert.AreEqual(updateSetting.LastModifiedById, tokenResponse.LastModifiedById, testType);
+            int lastModId = Int32.Parse(tokenResponse.LastModifiedById);
+            Assert.AreEqual(updateSetting.LastModifiedById, lastModId, testType);
             Assert.AreEqual(updateSetting.EndEffectiveDate, tokenResponse.EndEffectiveDate, testType);
 
             /*
