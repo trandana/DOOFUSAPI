@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Web.Http;
 using Microsoft.Ajax.Utilities;
+using NUnit.Framework;
 
 //using System.Web.Mvc;
 
@@ -604,7 +605,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 var notFoundResponse = Request.CreateResponse(HttpStatusCode.NotFound, "Setting not found");
                 return notFoundResponse;
             }
-
+            Assert.IsNotNull(currentSetting);
             //replace current setting values with new setting values
             currentSetting = UpdateSetting(currentSetting, setting);
 

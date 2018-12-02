@@ -51,6 +51,7 @@ namespace DOOFUS.Tests
             _mockSettingsController.Configuration = new HttpConfiguration();
 
             testSetting = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            testSetting.Id = 27;
         }
 
         
@@ -192,13 +193,28 @@ namespace DOOFUS.Tests
         [AsyncStateMachineAttribute(typeof(Task))]
         public async Task TestPuts()
         {
+            _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(testSetting);
+
+            var initialPostResponse = _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, false);
             string jsonMessage; //variable to hold json response
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await initialPostResponse.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            //Create a Json object based off the string so we can access the individual setting variables
+
+            TokenResponseModel tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
+            
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
             //Test Put setting (global) by id
             //PutGlobalSettingById(int id, Setting setting)
 
-            int id = 1; //id of global setting to update
+            Assert.IsNotNull(initialPostResponse);
+
+            int id = tokenResponse.Id; //id of global setting to update
 
             var response = _mockSettingsController.PutGlobalSettingById(id, updateSetting);
             testType = "PutSettingById";
@@ -210,7 +226,7 @@ namespace DOOFUS.Tests
             }
 
             //Create a Json object based off the string so we can access the individual setting variables
-            TokenResponseModel tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
+            tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
 
             //Check if update succeeded
             Assert.AreEqual(updateSetting.Value, tokenResponse.Value, testType);
