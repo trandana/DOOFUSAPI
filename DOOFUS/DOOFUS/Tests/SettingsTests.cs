@@ -58,8 +58,6 @@ namespace DOOFUS.Tests
             testSetting.Id = 27;
         }
 
-        
-       
         //note: will probably end up changing this all later and making a class layer in between Test and Controller 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
@@ -443,7 +441,28 @@ namespace DOOFUS.Tests
         [Test]
         public void TestGets()
         {
-            
+            /*
+            // Arrange
+            Setting data = new Setting
+            {
+                Value = "dark"
+            };
+
+            _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(data);
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+
+            _mockSettingsController.PostGlobalSetting(data, "Theme");
+
+            // Act
+            var response = _mockSettingsController.GetGlobalSettingData();
+
+            // Assert
+            Assert.AreEqual(response.Settings.First().Level, "Global");
+            Assert.AreEqual(response.Settings.First().Value, "dark");
+            Assert.AreEqual(response.Settings.First().SettingKey, "Theme");
+
+            */
         }    
 
         [Test]

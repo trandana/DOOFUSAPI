@@ -47,7 +47,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         //Get all settings for specific customer
-        //**
+        //**PostGlobalSetting
         [Route("settings/customer/{customerId}")]
         public GetResponse GetCustomerSettingData(int customerId)
         {
