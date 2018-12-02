@@ -17,6 +17,7 @@ using System.Web.Http;
 using Newtonsoft.Json;
 using NUnit.Framework.Internal;
 using System.Threading.Tasks;
+using NHibernate.Criterion;
 
 namespace DOOFUS.Tests
 {
@@ -38,9 +39,12 @@ namespace DOOFUS.Tests
         private const int customerid = 1;
         private const string customerids = "1,2,3";
         private const string deviceids = "50,12,42";
-        private const  string usernames = "Jody, Victor, Phum, Alex";
+        private const string usernames = "Jody,Victor,Phum,Alex";
         private const string username = "Jody";
-        
+        private readonly string[] cidsList = { "1", "2", "3" };
+        private readonly string[] didsList = { "50", "12", "42" };
+        private readonly string[] usernamesList = { "Jody", "Victor", "Phum", "Alex" };
+
         //Initialize mock repository and controller with a test setting
         [SetUp]
         public void Setup()
@@ -117,7 +121,9 @@ namespace DOOFUS.Tests
             Assert.AreEqual(testSetting.Level, tokenResponse.Level, testType);
             Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
             Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
-            //for loop to check customer ids...
+            Assert.AreEqual(customerids.ElementAt(customerids.Length -1).ToString().Replace("\"",""),
+                tokenResponse.CustomerId.Replace('"','\''), testType); //Trim the quotes off before comparison
+
 
             ////
             ////Test posting global setting for multiple customers with override
@@ -147,6 +153,7 @@ namespace DOOFUS.Tests
             Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
             Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
             Assert.AreEqual(customerid.ToString(), tokenResponse.CustomerId, testType);
+            Assert.AreEqual(username, tokenResponse.UserName, testType);
 
             //
             //Test customer setting for one or more users no override
@@ -166,6 +173,7 @@ namespace DOOFUS.Tests
             Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
             Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
             Assert.AreEqual(customerid.ToString(), tokenResponse.CustomerId, testType);
+            Assert.AreEqual(usernamesList.Last(), tokenResponse.UserName, testType); 
 
             //
             //Test customer setting for one or more users with override
@@ -185,7 +193,67 @@ namespace DOOFUS.Tests
             Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
             Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
             Assert.AreEqual(customerid.ToString(), tokenResponse.CustomerId, testType);
-            //For loop to check usernames...
+            Assert.AreEqual(usernamesList.Last(),tokenResponse.UserName, testType);
+
+            //
+            //Test customer setting for one or more users with no override
+            //
+            response = _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, false);
+            testType = "PostUserEntitySetting";
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+            //Create a Json object based off the string so we can access the individual setting variables
+            tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
+            //If the assert finishes without error, the setting we sent matches the setting we got back
+            Assert.AreEqual(testSetting.Level, tokenResponse.Level, testType);
+            Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
+            Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
+            Assert.AreEqual(customerid.ToString(), tokenResponse.CustomerId, testType);
+            Assert.AreEqual(username, tokenResponse.UserName); 
+
+            //
+            //Test customer setting for one or more users with  override
+            //
+            response = _mockSettingsController.PostUserEntitySetting(testSetting, customerid, username, testSetting.SettingKey, true);
+            testType = "PostUserEntitySettingOverride";
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+            //Create a Json object based off the string so we can access the individual setting variables
+            tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
+            //If the assert finishes without error, the setting we sent matches the setting we got back
+            Assert.AreEqual(testSetting.Level, tokenResponse.Level, testType);
+            Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
+            Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
+            Assert.AreEqual(customerid.ToString(), tokenResponse.CustomerId, testType);
+            Assert.AreEqual(username, tokenResponse.UserName);
+
+            //
+            //Test customer setting for one or more devices 
+            //
+            response = _mockSettingsController.PostDeviceSetting(testSetting, customerid, testSetting.SettingKey, deviceids);
+            testType = "PostDeviceSetting";
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+            //Create a Json object based off the string so we can access the individual setting variables
+            tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
+            //If the assert finishes without error, the setting we sent matches the setting we got back
+            Assert.AreEqual(testSetting.Level, tokenResponse.Level, testType);
+            Assert.AreEqual(testSetting.SettingKey, tokenResponse.SettingKey, testType);
+            Assert.AreEqual(testSetting.Value, tokenResponse.Value, testType);
+            Assert.AreEqual(customerid.ToString(), tokenResponse.CustomerId, testType);
+            Assert.AreEqual(didsList.Last(), tokenResponse.DeviceId);
 
         }
 
