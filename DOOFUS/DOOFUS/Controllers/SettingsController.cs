@@ -645,6 +645,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 return notFoundResponse;
             }
 
+
             //replace current setting values with new values if applicable
             currentSetting = UpdateSetting(currentSetting, setting);
 
@@ -675,12 +676,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
                 //Create HTTP response for overriding lower
                 var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
-                overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+               // overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
             }
             //Create HTTP response
             var updatedResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
-            updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
+           // updatedResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
             return updatedResponse;
         }
 
