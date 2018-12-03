@@ -540,58 +540,126 @@ namespace DOOFUS.Tests
 
         }
 
+        //
         [Test]
-        public void TestGets()
+        [Category("TestGet")]
+        public void TestGetGlobalSettingData()
         {
-            /*
-            // https://docs.microsoft.com/en-us/aspnet/web-api/overview/testing-and-debugging/unit-testing-controllers-in-web-api#testing-link-generation
             // Arrange
-            _mockSettingsController.Request = new HttpRequestMessage { 
-               RequestUri = new Uri("http://localhost/settings/global") 
-               };
-
-            _mockSettingsController.Configuration.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional });
-
-            _mockSettingsController.RequestContext.RouteData = new HttpRouteData(
-                route: new HttpRoute(),
-                values: new HttpRouteValueDictionary { { "controller", "global" } });
-            
-            /*
-            Setting data = new Setting
-            {
-                Value = "dark"
-            };
-
-            _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(data);
-            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
-            
-
-            _mockSettingsController.PostGlobalSetting(data, "Theme");
-            */
+            testType = "GetGlobalSetting";
+            _mockSettingsRepository.Setup(repo => repo.GetGlobalSetting()).Returns(Enumerable.Repeat(testSetting, 1));
 
             // Act
             var response = _mockSettingsController.GetGlobalSettingData();
-            
-            /*
-            // Assert
-            Assert.AreEqual(response.Settings.First().Level, "Global");
-            Assert.AreEqual(response.Settings.First().Value, "dark");
-            Assert.AreEqual(response.Settings.First().SettingKey, "Theme");
-            
 
-            Assert.AreEqual(response.Headers.Location.AbsoluteUri, "http://localhost/settings/global");
-            
-            */
+            // Assert
+            Assert.AreEqual(response.Level, "Global", testType);
+            Assert.AreEqual(response.Settings.First().Level, testSetting.Level, testType);
+            Assert.AreEqual(response.Settings.First().Value, testSetting.Value, testType);
+            Assert.AreEqual(response.Settings.First().SettingKey, testSetting.SettingKey, testType);
+        }
+
+        [Test]
+        [Category("TestGet")]
+        public void TestGetCustomerSettingData()
+        {
+            // Case: there is no customer id in database
+            // Arrange
+            testType = "GetCustomerSetting";
+
+            // Act
+            var response = _mockSettingsController.GetCustomerSettingData(customerid);
+
+            // Assert
+            Assert.AreEqual(response.Level, "Customer", testType);
+            Assert.AreEqual(response.Settings.Count(), 0, testType);
+
+            // Case: there is a customer id 
+            // Arrange
+            testType = "GetCustomerSetting";
+            testSetting.CustomerId = customerid;
+            _mockSettingsRepository.Setup(repo => repo.GetCustomerSettings(customerid)).Returns(Enumerable.Repeat(testSetting, 1));
+
+            // Act
+            response = _mockSettingsController.GetCustomerSettingData(customerid);
+
+            // Assert
+            Assert.AreEqual(response.Level, "Customer", testType);
+            Assert.AreEqual(response.Settings.First().Level, testSetting.Level, testType);
+            Assert.AreEqual(response.Settings.First().Value, testSetting.Value, testType);
+            Assert.AreEqual(response.Settings.First().SettingKey, testSetting.SettingKey, testType);
+        }
+
+
+        [Test]
+        [Category("TestGet")]
+        public void TestGetDeviceSettingData()
+        {
+            // Case: there is no device id in database
+            // Arrange
+            testType = "GetDeviceSetting";
+
+            // Act
+            var response = _mockSettingsController.GetDeviceSettingData(customerid, deviceid);
+
+            // Assert
+            Assert.AreEqual(response.Level, "Device", testType);
+            Assert.AreEqual(response.Settings.Count(), 0, testType);
+
+            // Case: there is a device id 
+            // Arrange
+            testType = "GetDeviceSetting";
+            testSetting.CustomerId = customerid;
+            testSetting.DeviceId = deviceid;
+            _mockSettingsRepository.Setup(repo => repo.GetDeviceSettings(customerid, deviceid)).Returns(Enumerable.Repeat(testSetting, 1));
+
+            // Act
+            response = _mockSettingsController.GetDeviceSettingData(customerid, deviceid);
+
+            // Assert
+            Assert.AreEqual(response.Level, "Device", testType);
+            Assert.AreEqual(response.Settings.First().Level, testSetting.Level, testType);
+            Assert.AreEqual(response.Settings.First().Value, testSetting.Value, testType);
+            Assert.AreEqual(response.Settings.First().SettingKey, testSetting.SettingKey, testType);
+        }
+
+        [Test]
+        [Category("TestGet")]
+        public void TestGetUserSettingData()
+        {
+            // Case: there is no username in database
+            // Arrange
+            testType = "GetUserSetting";
+
+            // Act
+            var response = _mockSettingsController.GetUserSettingData(customerid, username);
+
+            // Assert
+            Assert.AreEqual(response.Level, "User", testType);
+            Assert.AreEqual(response.Settings.Count(), 0, testType);
+
+            // Case: there is a username in database
+            // Arrange
+            testType = "GetUserSetting";
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            _mockSettingsRepository.Setup(repo => repo.GetUserSettings(customerid, username)).Returns(Enumerable.Repeat(testSetting, 1));
+
+            // Act
+            response = _mockSettingsController.GetUserSettingData(customerid, username);
+
+            // Assert
+            Assert.AreEqual(response.Level, "User", testType);
+            Assert.AreEqual(response.Settings.First().Level, testSetting.Level, testType);
+            Assert.AreEqual(response.Settings.First().Value, testSetting.Value, testType);
+            Assert.AreEqual(response.Settings.First().SettingKey, testSetting.SettingKey, testType);
         }
 
         [Test]
         public void TestDeletes()
         {
             String Key = "Key";
-
+        
             //Global delete
             testType = "DeleteSingleGlobalSettingWithFalse";
             _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey,

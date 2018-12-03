@@ -38,13 +38,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //GET a global setting
         //**
         [Route("settings/global")]
-        public HttpResponseMessage GetGlobalSettingData()
+        public GetResponse GetGlobalSettingData()
         {
-            var settings = new GetResponse();
-            settings.Level = GLOBAL;
-            settings.Settings = settingRepository.GetGlobalSetting();
+            var response = new GetResponse();
+            response.Level = GLOBAL;
+            response.Settings = settingRepository.GetGlobalSetting();
 
-            var response = Request.CreateResponse<GetResponse>(HttpStatusCode.Created, settings);
             return response;
         }
 
@@ -92,7 +91,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             return response;
         }
 
-        //Get all settigns for a specific username
+        //Get all settings for a specific username
         [Route("settings/user/{customerId}/{userName}")]
         public GetResponse GetUserSettingData(int customerId, string userName)
         {
