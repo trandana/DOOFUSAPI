@@ -164,14 +164,15 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         /// <summary>
-        /// Post a setting (global) 
+        /// Post a global setting with option to override lower levels. Takes a setting key
+        /// and true or false boolean
         /// </summary>
         /// <param name="key">Setting Key</param>
         /// <param name="overrideLower">example: true</param>
         /// <returns>return 200 if all good, 400 if key is empty, or 412 if setting already exists</returns>
         //Post a global setting with option to override lower levels
         //**
-      
+
         [Route("settings/global/{key}/{overrideLower:bool?}")]
         public HttpResponseMessage PostGlobalSetting(Setting setting, string key, bool overrideLower = false)
         {
@@ -221,7 +222,9 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         }
 
         /// <summary>
-        /// Post a setting (global) 
+        /// Post a setting at the global level for one or more customers. Takes customer
+        /// id's as parameters as comma separated integers and a true/false boolean for overridding lower
+        /// levels
         /// </summary>
         /// <param name="key">Setting Key</param>
         /// <param name="overrideLower">example: true</param>
@@ -306,7 +309,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
 
         /// <summary>
-        /// Post a setting (global) 
+        /// Post a setting for multiple devices or users at the customer level.
+        /// takes usernames as comma separated names, or deviceids as comma separated
+        /// integers. (no spaces between device ids or username items). Takes true/false boolean
+        /// if override is desired
         /// </summary>
         /// <param name="customerid">Which Customer is it For</param>
         /// <param name="overrideLower">example: true</param>
@@ -416,7 +422,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //POST User Level
         //  
         /// <summary>
-        /// Post a setting (global) 
+        /// Post a setting for one user at the user level. Takes username, setting key and
+        /// true or false boolean to overridde lower levels
         /// </summary>
         /// <param name="customerid">Which Customer is it For</param>
         /// <param name="username">Which user this is for. Example: Jason</param>
@@ -483,7 +490,8 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         //
         
         /// <summary>
-        /// Post a setting (global) 
+        /// Post a setting for one or more devices at the device level. Takes in the customer id,
+        /// setting key and comma separated integers for devices ids (no spaces)
         /// </summary>
         /// <param name="customerid">Which Customer is it For</param>
         /// <param name="key">Setting Key</param>
