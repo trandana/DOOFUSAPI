@@ -614,8 +614,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 var notFoundResponse = Request.CreateResponse(HttpStatusCode.NotFound, "Setting not found");
                 return notFoundResponse;
             }
-            Assert.IsNotNull(currentSetting);
-            Assert.AreEqual(currentSetting.Id, id);
+            
             //replace current setting values with new setting values
             currentSetting = UpdateSetting(currentSetting, setting);
 
@@ -667,13 +666,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             if (overrideLower)
             {
                 //get list of all lower level settings with specified key
-                var listOfCurrentSettings = settingRepository.GetAll()
-                    .Where(x => x.SettingKey == key &&
-                    x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
+                // var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == CUSTOMER || x.Level == DEVICE || x.Level == USER).ToList();
+                var listOfCurrentSettings = settingRepository.OverrideTest().ToList(); //for testing
 
                 if (listOfCurrentSettings.Contains(null))
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to overrride.");
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
                     return notFoundResponse;
                 }
 
@@ -684,7 +682,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
 
                 //Create HTTP response for overriding lower
-                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK);
                 // overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
             }
@@ -733,13 +731,12 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             if (overrideLower)
             {
                 //get list of all setting with specified key
-                var listOfCurrentSettings = settingRepository.GetAll()
-                    .Where(x => x.SettingKey == key &&
-                    x.Level == DEVICE || x.Level == USER).ToList();
+                //var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.SettingKey == key && x.Level == DEVICE || x.Level == USER).ToList();
+                var listOfCurrentSettings = settingRepository.OverrideTest().ToList(); //for testing
 
                 if (listOfCurrentSettings.Contains(null))
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting);
                     return notFoundResponse;
                 }
 
@@ -750,7 +747,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
 
                 //Create HTTP response for overriding lower
-                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK);
                 //overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
             }
@@ -814,20 +811,20 @@ namespace DOOFUS.Nhbnt.Web.Controllers
             if (overrideLower)
             {
                 var currentSettingsToOverride = new List<Setting>(); //new list to store settings
-
-                //add lower level settings to currentSettings list
+                currentSettingsToOverride = settingRepository.OverrideTest().ToList(); //for testing
+                //add lower level settings to currentSettingsToOverride list
                 for (int j = 0; j < separated.Count(); j++)
                 {
-                    currentSettingsToOverride.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
-                    x.Level == DEVICE && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
+                    //currentSettingsToOverride.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    //x.Level == DEVICE && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
 
-                    currentSettingsToOverride.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
-                    x.Level == USER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
+                   // currentSettingsToOverride.Add(settingRepository.GetAll().Where(x => x.SettingKey == key &&
+                    //x.Level == USER && x.CustomerId == cIds[j]).ToList().FirstOrDefault<Setting>());
                 }
 
                 if (currentSettingsToOverride.Contains(null))
                 {
-                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, "Updated setting. Unable to find lower level settings to delete.");
+                    var notFoundResponse = Request.CreateResponse(HttpStatusCode.OK, currentSettings);
                     return notFoundResponse;
                 }
 
@@ -838,7 +835,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
 
                 //Create HTTP response for overriding lower
-                var overrideResponse = Request.CreateResponse<List<Setting>>(HttpStatusCode.OK, currentSettings, "Override successful");
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK);
                 //overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
 
@@ -881,10 +878,10 @@ namespace DOOFUS.Nhbnt.Web.Controllers
 
             if (overrideLower)
             {
-                var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key
-                && x.Level == DEVICE || x.Level == USER).ToList();
+                //var listOfCurrentSettings = settingRepository.GetAll().Where(x => x.DeviceId == entityId && x.SettingKey == key && x.Level == DEVICE || x.Level == USER).ToList();
+                var listOfCurrentSettings = settingRepository.OverrideTest().ToList();
 
-                if (listOfCurrentSettings.Count() == 0)
+                if (listOfCurrentSettings.Contains(null))
                 {
                     var notFoundResponse = Request.CreateResponse(HttpStatusCode.BadRequest);
                     return notFoundResponse;
@@ -896,7 +893,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
                 }
 
                 //Create HTTP response for overriding lower
-                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK, currentSetting, "Override successful");
+                var overrideResponse = Request.CreateResponse(HttpStatusCode.OK);
                 //overrideResponse.Content = new StringContent(SUCCESS, Encoding.UTF8, "application/json");
                 return overrideResponse;
 
@@ -1115,7 +1112,7 @@ namespace DOOFUS.Nhbnt.Web.Controllers
         /// <param name="setting"></param>
         /// <returns>Returns 200 on succesful update and returns 400 on unsuccessful update.</returns>
 
-        //put setting for multiple users
+        //Put setting for multiple users
 
         //NOTE: the route for this function call has been adjusted to "users" rather than "user". This call collides with the call above.
         [Route("settings/users/{customerId}/{key}/{usernames}")]

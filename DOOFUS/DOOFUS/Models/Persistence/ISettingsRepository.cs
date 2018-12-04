@@ -24,7 +24,8 @@ namespace DOOFUS.Models.Persistence
         Setting GetGlobalSetting(string key);
         Setting GetGlobalSetting(int id, string key);
         IEnumerable<Setting> GetGlobalSetting();
-        IEnumerable<Setting> GetAll();   
-        
+        IEnumerable<Setting> GetAll();
+        IEnumerable<Setting> OverrideTest();
+
     }
 }

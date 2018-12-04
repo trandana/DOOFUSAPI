@@ -268,6 +268,7 @@ namespace DOOFUS.Tests
             testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(testSetting);
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+            
 
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
@@ -303,10 +304,18 @@ namespace DOOFUS.Tests
             //Test for PutGlobalSetting(string key, Setting setting, bool overrideLower)
 
             //setup repo
+            //List of settings used for testing OverrideLower
+            Setting override1 = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            Setting override2 = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            Setting override3 = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            List<Setting> overrideLower = new List<Setting> { override1, override2, override3 };
+
             testSetting.CustomerId = customerid;
             testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+            _mockSettingsRepository.Setup(repo => repo.OverrideTest()).Returns(overrideLower);
 
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
@@ -333,12 +342,11 @@ namespace DOOFUS.Tests
             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
 
+            //override lower = true
+            response = _mockSettingsController.PutGlobalSetting(settingKey, updateSetting, true);
+            testType = "PutGlobalSettingOverrideLower";
 
-
-
-            /*  //override lower = true
-              response = _mockSettingsController.PutGlobalSetting(settingKey, updateSetting, true);
-              testType = "PutGlobalSettingOverrideLower"; */
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
 
         }
 
@@ -349,10 +357,18 @@ namespace DOOFUS.Tests
             //Test for PutCustomerSetting(string key, Setting setting, bool overrideLower)
 
             //setup repo
+            //List of settings used for testing OverrideLower
+            Setting override1 = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            Setting override2 = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            Setting override3 = new Setting { Value = "100", SettingKey = "DisplayBrightness" };
+            List<Setting> overrideLower = new List<Setting> { override1, override2, override3 };
+
             testSetting.CustomerId = customerid;
             testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+            _mockSettingsRepository.Setup(repo => repo.OverrideTest()).Returns(overrideLower);
 
 
             //Put global with option to override
@@ -382,6 +398,12 @@ namespace DOOFUS.Tests
             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
 
+            //override lower = true
+            response = _mockSettingsController.PutCustomerSetting(settingKey, updateSetting, true);
+            testType = "PutGlobalSettingOverrideLower";
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
         }
 
         [Test]
@@ -393,6 +415,12 @@ namespace DOOFUS.Tests
             //PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
 
             //setup repo
+            //List of settings used for testing OverrideLower
+            Setting override1 = new Setting { Value = "101", SettingKey = "DisplayBrightness1" };
+            Setting override2 = new Setting { Value = "102", SettingKey = "DisplayBrightness2" };
+            Setting override3 = new Setting { Value = "103", SettingKey = "DisplayBrightness3" };
+            List<Setting> overrideLower = new List<Setting> { override1, override2, override3 };
+
             string cusIds = "111,222";
             int cus1 = 111;
             int cus2 = 222;
@@ -403,6 +431,7 @@ namespace DOOFUS.Tests
             List<Setting> list = new List<Setting> { setting1, setting2 };
             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(list);
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+            _mockSettingsRepository.Setup(repo => repo.OverrideTest()).Returns(overrideLower);
 
 
 
@@ -438,6 +467,11 @@ namespace DOOFUS.Tests
             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[1].LastModifiedById);
             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[1].EndEffectiveDate);
 
+            //override lower = true
+            response = _mockSettingsController.PutCustomerSettingMultiple(settingKey, updateSetting, cusIds, true);
+            testType = "PutGlobalSettingOverrideLower";
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
 
         }
 
@@ -451,10 +485,17 @@ namespace DOOFUS.Tests
 
 
             //setup repo
+            //List of settings used for testing OverrideLower
+            Setting override1 = new Setting { Value = "101", SettingKey = "DisplayBrightness1" };
+            Setting override2 = new Setting { Value = "102", SettingKey = "DisplayBrightness2" };
+            Setting override3 = new Setting { Value = "103", SettingKey = "DisplayBrightness3" };
+            List<Setting> overrideLower = new List<Setting> { override1, override2, override3 };
+
             testSetting.CustomerId = customerid;
             testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+            _mockSettingsRepository.Setup(repo => repo.OverrideTest()).Returns(overrideLower);
 
 
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
@@ -484,6 +525,12 @@ namespace DOOFUS.Tests
             Assert.AreEqual(updateSetting.Value, jsonObject.Value);
             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
+
+            //override lower = true
+            response = _mockSettingsController.PutCustomerEntitySetting(customerid, settingKey, updateSetting, true);
+            testType = "PutCustomerEntitySettingOverrideLower";
+
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
         }
 
         [Test]

@@ -192,6 +192,13 @@ namespace DOOFUS.Models.Persistence
                 return session.Query<Setting>().ToList();
         }
 
+        public IEnumerable<Setting> OverrideTest()
+        {
+            using (var session = NHibernateHelper.OpenSession())
+                return session.Query<Setting>().ToList();
+        }
+    
+
 
 
     }
