@@ -258,10 +258,9 @@ namespace DOOFUS.Tests
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts1()
+        public async Task TestPutGlobalSettingById()
         {
             //Test for PutGlobalSettingById(int id, Setting setting)
-
 
             //first post a setting to update
             testSetting.CustomerId = customerid;
@@ -269,29 +268,16 @@ namespace DOOFUS.Tests
             _mockSettingsRepository.Setup(repo => repo.Get(It.IsAny<int>())).Returns(testSetting);
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
 
-           /* var initialPostResponse = _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, false);
-            string jsonMessage; //variable to hold json response
-            //Get the response message as a stream and parse it into a string
-            using (Stream responseStream = await initialPostResponse.Content.ReadAsStreamAsync())
-            {
-                jsonMessage = new StreamReader(responseStream).ReadToEnd();
-            }
-
-            //Create a Json object based off the string so we can access the individual setting variables
-
-            TokenResponseModel tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
-            */
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
             //Test Put setting (global) by id
             //PutGlobalSettingById(int id, Setting setting)
 
-           // Assert.IsNotNull(initialPostResponse);
-
             int id = testSetting.Id; //id of global setting to update
-            string jsonMessage; //variable to hold json response
+            
             var response = _mockSettingsController.PutGlobalSettingById(id, updateSetting);
             testType = "PutSettingById";
+            string jsonMessage;
 
             //Get the response message as a stream and parse it into a string
             using (Stream responseStream = await response.Content.ReadAsStreamAsync())
@@ -311,7 +297,7 @@ namespace DOOFUS.Tests
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts2()
+        public async Task TestPutGlobalSetting()
         {
             //Test for PutGlobalSetting(string key, Setting setting, bool overrideLower)
 
@@ -320,25 +306,8 @@ namespace DOOFUS.Tests
             testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
-            
-
-            //post setting to be updated
-            var initialPostResponse = _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, false);
-
-            string jsonMessage; //variable to hold json response
-            //Get the response message as a stream and parse it into a string
-            using (Stream responseStream = await initialPostResponse.Content.ReadAsStreamAsync())
-            {
-                jsonMessage = new StreamReader(responseStream).ReadToEnd();
-            }
-
-            //Create a Json object based off the string so we can access the individual setting variables
-
-            TokenResponseModel tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
-
+           
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
-
-            Assert.IsNotNull(initialPostResponse);
 
             //Put global with option to override
             //PutGlobalSetting(string key, Setting setting, bool overrideLower = false)
@@ -347,17 +316,18 @@ namespace DOOFUS.Tests
             string settingKey = testSetting.SettingKey;
             var response = _mockSettingsController.PutGlobalSetting(settingKey, updateSetting, false);
             testType = "PutGlobalSetting";
-            
+            string jsonMessage;
             
             //Get the response message as a stream and parse it into a string
             using (Stream responseStream = await response.Content.ReadAsStreamAsync())
             {
                 jsonMessage = new StreamReader(responseStream).ReadToEnd();
             }
-            
+
+            var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
-            
-            var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json
             Assert.AreEqual(updateSetting.Value, jsonObject.Value);
             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
@@ -373,191 +343,424 @@ namespace DOOFUS.Tests
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts3()
+        public async Task TestPutCustomerSetting()
         {
-            //Test for PutCustomerSetting(string key, Setting setting, bool overrideLower)
+             //Test for PutCustomerSetting(string key, Setting setting, bool overrideLower)
+
+             //setup repo
+             testSetting.CustomerId = customerid;
+             testSetting.UserName = username;
+             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
+             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+      
+            //Put global with option to override
+            //PutCustomerSetting(string key, Setting setting, bool overrideLower = false)
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
+                                                                                                //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+             var response = _mockSettingsController.PutCustomerSetting(settingKey, updateSetting, false);
+             testType = "PutCustomerSetting";
+            string jsonMessage;
+
+             Assert.IsNotNull(response);
+             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+              //Get the response message as a stream and parse it into a string
+              using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+              {
+                  jsonMessage = new StreamReader(responseStream).ReadToEnd();
+              }
+              
+              
+              var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+              //check if update successful 
+
+              Assert.AreEqual(updateSetting.Value, jsonObject.Value);
+              Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
+              Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
+              
+        }
+
+        [Test]
+        [AsyncStateMachineAttribute(typeof(Task))]
+        public async Task TestPutCustomerSettingMultiple()
+        {
+
+            //Put mutliple settings (customer) with option to override lower
+            //PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
+
+            //setup repo
+            string cusIds = "111,222";
+            int cus1 = 111;
+            int cus2 = 222;
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            Setting setting1 = new Setting { SettingKey = testSetting.SettingKey, CustomerId = cus1, Value = "val1", LastModifiedById = 1234 };
+            Setting setting2 = new Setting { SettingKey = "setting", CustomerId = cus2, Value = "val2", LastModifiedById = 1234 };
+            List<Setting>list = new List<Setting> { setting1, setting2};
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(list);
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+            
+
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
+
+            //Put mutliple settings (customer) with option to override lower
+            //PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
+            
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutCustomerSettingMultiple(settingKey, updateSetting, cusIds, false);
+            testType = "PutCustomerSettingMultiple";
+            string jsonMessage;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+             var jsonObject = JsonConvert.DeserializeObject<List<Setting>>(jsonMessage); //deserialize json to object
+
+             //check if update successful 
+
+             Assert.AreEqual(updateSetting.Value, jsonObject[0].Value);
+             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[0].LastModifiedById);
+             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[0].EndEffectiveDate);
+
+            Assert.AreEqual(updateSetting.Value, jsonObject[1].Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[1].LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[1].EndEffectiveDate);
+
+
+        }
+
+        [Test]
+        [AsyncStateMachineAttribute(typeof(Task))]
+        public async Task TestPutCustomerEntitySetting()
+        {
+
+            //Put setting - Specific Entity (customer) and override lower
+            //PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
+
 
             //setup repo
             testSetting.CustomerId = customerid;
             testSetting.UserName = username;
             _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
             _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
-            var initialPostResponse = _mockSettingsController.PostGlobalSetting(testSetting, testSetting.SettingKey, false);
-            string jsonMessage; //variable to hold json response
-            //Get the response message as a stream and parse it into a string
-            using (Stream responseStream = await initialPostResponse.Content.ReadAsStreamAsync())
-            {
-                jsonMessage = new StreamReader(responseStream).ReadToEnd();
-            }
 
-            //Create a Json object based off the string so we can access the individual setting variables
+          
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
-            TokenResponseModel tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
+            //Put global with option to override
+            //PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
+
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutCustomerEntitySetting(customerid, settingKey, updateSetting, false);
+            testType = "PutCustomerEntitySetting";
+            string jsonMessage;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+             //Get the response message as a stream and parse it into a string
+             using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+             {
+                 jsonMessage = new StreamReader(responseStream).ReadToEnd();
+             }
+
+             var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+             //check if update successful 
+
+             Assert.AreEqual(updateSetting.Value, jsonObject.Value);
+             Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
+             Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
+        }
+
+        [Test]
+        [AsyncStateMachineAttribute(typeof(Task))]
+        public async Task TestPutDeviceSetting()
+        {
+
+            // PutDeviceSetting(int customerId, string key, Setting setting)
+
+            //setup repo
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
 
             Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
 
-            Assert.IsNotNull(initialPostResponse);
-
-
-
-            //Put setting (customer) with option to override lower
-            //PutCustomerSetting(string key, Setting setting, bool overrideLower = false)
-
-            //overrideLower = false
-            string key = testSetting.SettingKey;
-            var response = _mockSettingsController.PutCustomerSetting(key, updateSetting, false);
-            testType = "PutGlobalSetting";
-
-            //Get the response message as a stream and parse it into a string
-            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
-            {
-                jsonMessage = new StreamReader(responseStream).ReadToEnd();
-            }
-
-            //Create a Json object based off the string so we can access the individual setting variables
-            tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
-
-            int lastModId = Int32.Parse(tokenResponse.LastModifiedById);
-
-            //Check if update succeeded
-            Assert.AreEqual(updateSetting.Value, tokenResponse.Value, testType);
-            Assert.AreEqual(updateSetting.LastModifiedById, lastModId, testType);
-            Assert.AreEqual(updateSetting.EndEffectiveDate, tokenResponse.EndEffectiveDate, testType);
-
-
-            //override lower = true
-            key = "newCustomerSetting";
-            var response2 = _mockSettingsController.PutCustomerSetting(key, updateSetting, true);
-            testType = "PutGlobalSettingOverrideLower";
-
-            //Get the response message as a stream and parse it into a string
-            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
-            {
-                jsonMessage = new StreamReader(responseStream).ReadToEnd();
-            }
-
-            //Create a Json object based off the string so we can access the individual setting variables
-            tokenResponse = (TokenResponseModel)JsonConvert.DeserializeObject(jsonMessage, typeof(TokenResponseModel));
-
-        }
-
-        [Test]
-        [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts4()
-        {
-            /*
-            //Put mutliple settings (customer) with option to override lower
-            //PutCustomerSettingMultiple(string key, Setting setting, string customerIds, bool overrideLower = false)
-
-            key = "multipleCustomers";
-
-            //override lower = false
-            response = _mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, false);
-            testType = "PutCustomerSettingMultiple";
-
-            //overrride lower = true
-            response = _mockSettingsController.PutCustomerSettingMultiple(key, updateSetting, customerids, true);
-            testType = "PutCustomerSettingMultipleOverrideLower";
-
-    */
-
-        }
-
-        [Test]
-        [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts5()
-        {
-            /*
-            //Put setting - Specific Entity (customer) and override lower
-            //PutCustomerEntitySetting(int entityId, string key, Setting setting, bool overrideLower = false)
-
-            int entityId = 123;
-            key = "customerEntitySetting";
-
-            //override lower = false
-            response = _mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, false);
-            testType = "PutCustomerEntitySetting";
-
-            //overrride lower = true
-            response = _mockSettingsController.PutCustomerEntitySetting(entityId, key, updateSetting, true);
-            testType = "PutCustomerEntitySettingOverrideLower";
-            */
-        }
-
-        [Test]
-        [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts6()
-        {
-            /*
-            //Put setting for device
+            //Put global with option to override
             //PutDeviceSetting(int customerId, string key, Setting setting)
-            int customerId = 111;
-            key = "deviceSetting";
 
-            response = _mockSettingsController.PutDeviceSetting(customerId, key, updateSetting);
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutDeviceSetting(customerid, settingKey, updateSetting);
             testType = "PutDeviceSetting";
-            
+            string jsonMessage;
 
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
 
-            //Put setting for multiple devices
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
+
+            Assert.AreEqual(updateSetting.Value, jsonObject.Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
+
+        }
+
+        [Test]
+        [AsyncStateMachineAttribute(typeof(Task))]
+        public async Task TestPutDeviceSettingMultiple()
+        {
             //PutDeviceSettingMultiple(int customerId, string key, string deviceIds, Setting setting)
 
-            customerId = 123;
-            key = "multipleDeviceSetting";
 
-            response = _mockSettingsController.PutDeviceSettingMultiple(customerId, key, deviceids, updateSetting);
-            testType = "PutDeviceSettingMultiple"; */
+            //setup repo
+            string devIds = "111,222";
+            int dev1 = 111;
+            int dev2 = 222;
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            Setting setting1 = new Setting { CustomerId = customerid, SettingKey = testSetting.SettingKey, DeviceId = dev1, Value = "val1", LastModifiedById = 1234 };
+            Setting setting2 = new Setting { CustomerId = customerid, SettingKey = "setting", DeviceId = dev2, Value = "val2", LastModifiedById = 1234 };
+            List<Setting> list = new List<Setting> { setting1, setting2 };
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(list);
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 12345 }; //values to update with
+
+            //Put global with option to override
+            //PutDeviceSettingMultiple(int customerId, string key, string deviceIds, Setting setting)
+
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutDeviceSettingMultiple(customerid, settingKey, devIds, updateSetting);
+            testType = "PutCustomerSettingMultiple";
+            string jsonMessage;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            var jsonObject = JsonConvert.DeserializeObject<List<Setting>>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
+
+            Assert.AreEqual(updateSetting.Value, jsonObject[0].Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[0].LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[0].EndEffectiveDate);
+
+            Assert.AreEqual(updateSetting.Value, jsonObject[1].Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[1].LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[1].EndEffectiveDate);
+
 
         }
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts7()
+        public async Task TestPutDeviceEntitySetting()
         {
-            /*
-            //Put setting for device - Specific device
+
+            // PutDeviceEntitySetting(int customerId, int entityId, string key, Setting setting)
+
+            //setup repo
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            testSetting.DeviceId = 123;
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
+
+            //Put global with option to override
             //PutDeviceEntitySetting(int customerId, int entityId, string key, Setting setting)
-            key = "deviceEntitySetting";
-            entityId = 99;
 
-            response = _mockSettingsController.PutDeviceEntitySetting(customerId, entityId, key, updateSetting);
-            testType = "PutDeviceEntitySetting";*/
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutDeviceEntitySetting(customerid, 123, settingKey, updateSetting);
+            testType = "PutDeviceEntitySetting";
+            string jsonMessage;
 
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
 
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
+
+            Assert.AreEqual(updateSetting.Value, jsonObject.Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
 
         }
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts8()
+        public async Task TestPutUserSetting()
         {
-            /*
-            //Put setting for user 
             //PutUserSetting(int customerId, string key, Setting setting)
-            response = _mockSettingsController.PutUserSetting(customerId, key, updateSetting);
+
+            //setup repo
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
+
+            //Put global with option to override
+            //PutUserSetting(int customerId, string key, Setting setting)
+
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutUserSetting(customerid, settingKey, updateSetting);
             testType = "PutUserSetting";
-            */
+            string jsonMessage;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
+
+            Assert.AreEqual(updateSetting.Value, jsonObject.Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
 
         }
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts9()
+        public async Task TestPutUserEntitySetting()
         {
-            /*
-            //Put setting for user - Specific entity (username)
             //PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
-            var entityid = "user";
-            response = _mockSettingsController.PutUserEntitySetting(customerId, entityid, key, updateSetting);
-            testType = "PutUserEntitySetting";*/
 
+            //setup repo
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(Enumerable.Repeat(testSetting, 1));
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
+
+
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 1234 }; //values to update with
+
+            //Put global with option to override
+            //PutUserEntitySetting(int customerId, string entityId, string key, Setting setting)
+
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutUserEntitySetting(customerid, username, settingKey, updateSetting);
+            testType = "PutUserEntitySetting";
+            string jsonMessage;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            var jsonObject = JsonConvert.DeserializeObject<Setting>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
+
+            Assert.AreEqual(updateSetting.Value, jsonObject.Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject.LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject.EndEffectiveDate);
         }
 
         [Test]
         [AsyncStateMachineAttribute(typeof(Task))]
-        public async Task TestPuts10()
+        public async Task TestPutUserSettingMultiple()
         {
+            //PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
+            //setup repo
+            string newUsers = "joe,jack";
+            string joe = "joe";
+            string jack = "jack";
+            testSetting.CustomerId = customerid;
+            testSetting.UserName = username;
+            Setting setting1 = new Setting { CustomerId = customerid, SettingKey = testSetting.SettingKey, UserName = joe, Value = "val1", LastModifiedById = 1234 };
+            Setting setting2 = new Setting { CustomerId = customerid, SettingKey = "setting", UserName = jack, Value = "val2", LastModifiedById = 1234 };
+            List<Setting> list = new List<Setting> { setting1, setting2 };
+            _mockSettingsRepository.Setup(repo => repo.GetAll()).Returns(list);
+            _mockSettingsRepository.Setup(repo => repo.Update(It.IsAny<Setting>())).Returns(true);
 
+            Setting updateSetting = new Setting { Value = "Updated", LastModifiedById = 12345 }; //values to update with
+
+            //Put global with option to override
+            //PutUserSettingMultiple(int customerId, string key, string usernames, Setting setting)
+
+            //Overrride lower = false
+            string settingKey = testSetting.SettingKey;
+            var response = _mockSettingsController.PutUserSettingMultiple(customerid, settingKey, newUsers, updateSetting);
+            testType = "PutUserSettingMultiple";
+            string jsonMessage;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
+
+            //Get the response message as a stream and parse it into a string
+            using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+            {
+                jsonMessage = new StreamReader(responseStream).ReadToEnd();
+            }
+
+            var jsonObject = JsonConvert.DeserializeObject<List<Setting>>(jsonMessage); //deserialize json to object
+
+            //check if update successful 
+
+            Assert.AreEqual(updateSetting.Value, jsonObject[0].Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[0].LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[0].EndEffectiveDate);
+
+            Assert.AreEqual(updateSetting.Value, jsonObject[1].Value);
+            Assert.AreEqual(updateSetting.LastModifiedById, jsonObject[1].LastModifiedById);
+            Assert.AreEqual(updateSetting.EndEffectiveDate, jsonObject[1].EndEffectiveDate);
         }
 
         //
